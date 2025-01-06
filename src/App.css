@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .App {
   text-align: center;
 }
@@ -47,4 +51,20 @@
   text-indent: -9999em;
   animation: mulShdSpin 1.1s infinite ease;
   transform: translateZ(0);
+}
+
+/* resources/css/app.css */
+.transition-underline {
+  @apply relative;
+}
+
+.transition-underline::before {
+  @apply absolute left-0 bottom-0 h-[3px] w-full bg-current transform scale-x-0 origin-left transition-transform duration-300 ease-out bg-purple-400;
+  content: '';
+}
+
+.transition-underline:hover::before,
+.transition-underline:focus::before,
+.transition-underline:active::before {
+  @apply scale-x-100;
 }
