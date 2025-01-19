@@ -65,6 +65,7 @@
 
 .transition-underline:hover::before,
 .transition-underline:focus::before,
-.transition-underline:active::before {
+.transition-underline:active::before,
+.transition-underline.active::before { /* Include active state */
   @apply scale-x-100;
 }
