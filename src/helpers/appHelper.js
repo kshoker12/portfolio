@@ -5,7 +5,8 @@ import Aos from "aos";
  */
 const initializeAOS = () => {
     Aos.init({
-        duration: 2000
+        duration: 2000,
+        once: true
       });
     Aos.refresh();
 };

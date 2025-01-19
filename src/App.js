@@ -11,6 +11,8 @@ import Testimonials from './components/Testimonials';
 import Contact from './components/Contact';
 import Skills from './components/Skills';
 import { navLinks } from './constants';
+import Algorithms from './components/Algorithms';
+import Certifications from './components/Certifications';
 
 /**
  * @description App parent component which houses all portfolio components
@@ -75,10 +77,12 @@ const App = () => {
   /** All app components such as navigation bar */
   return (
     <Provider>
-      <div className='bg-darker relative' ref={aboutUsRef}>
+      <div className='bg-darker relative overflow-hidden' ref={aboutUsRef}>
         <Landing showColor={showColor} active={active} setActive={setActive}/>
         <About />
         <Skills/>
+        <Algorithms/>
+        <Certifications/>
         <WorkExperience/>
         <Projects/>
         <Testimonials/>
