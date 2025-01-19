@@ -14,15 +14,15 @@ const Navigation = ({showColor, active, setActive}) => {
 
   /** Render navigation bar of sections in application */
   return (
-    <Scrollspy
-        items={["experience", "skills", "testimonials", "contact", "about", "projects"]}
-        currentClassName="active"
-        onUpdate={(el)=>{
-            if (el != undefined && el?.id ) setActive(el.id);
-            setUpdateCount(updateCount+1);
-            console.log(active);
-        }}
-    >
+    // <Scrollspy
+    //     items={["experience", "skills", "testimonials", "contact", "about", "projects"]}
+    //     currentClassName="active"
+    //     onUpdate={(el)=>{
+    //         if (el != undefined && el?.id ) setActive(el.id);
+    //         setUpdateCount(updateCount+1);
+    //         console.log(active);
+    //     }}
+    // >
         <nav
         className={`w-full flex items-center py-5 fixed top-0 z-20`}
         >
@@ -103,7 +103,7 @@ const Navigation = ({showColor, active, setActive}) => {
             </div>
         </div>
         </nav>    
-    </Scrollspy>
+    // </Scrollspy>
     
   )
 }
