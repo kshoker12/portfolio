@@ -20,7 +20,7 @@ const ProjectCard = ({name, index, description, tags, image, source_code_link, i
         }}
         className = "bg-tertiary p-5 rounded-2xl sm:w-[360px] w-full"
       > */}
-        <div className="relative w-full h-[230px]">
+        <div className="relative w-full h-[230px] sm:w-[360px]">
           <img 
             src={image} 
             alt={name} 
