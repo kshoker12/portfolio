@@ -8,10 +8,10 @@ import SectionWrapper from './SectionWrapper'
 
 const ServiceCard = ({index, name, icon}) => {
   return (
-    <Tilt className = "w-[130px]">
+    // <Tilt className = "w-[130px]">
       <motion.div 
         variants={fadeIn("right", "spring", 0.15 * index, 0.75)}
-        className='w-full green-pink-gradient p-[1px] rounded-[20px] shadow-card'
+        className='w-[130px] green-pink-gradient p-[1px] rounded-[20px] shadow-card'
       >
         <div 
           className="bg-tertiary rounded-[20px] py-5 px-12 min-h-[130px] flex justify-evenly items-center flex-col"
@@ -28,16 +28,16 @@ const ServiceCard = ({index, name, icon}) => {
 
         </div>
       </motion.div>
-    </Tilt>
+    // </Tilt>
   )
 }
 
 const ServiceCardAlt = ({index, name, icon, certificate, link}) => {
   return (
-    <Tilt className = "w-[250px]">
+    // <Tilt className = "w-[250px]">
       <motion.div 
         variants={fadeIn("right", "spring", 0.15 * index, 0.75)}
-        className='w-full green-pink-gradient p-[1px] rounded-[20px] shadow-card'
+        className='w-[250px] green-pink-gradient p-[1px] rounded-[20px] shadow-card'
       >
         <div 
           className="bg-tertiary rounded-[20px] py-5 px-6 min-h-[130px] flex justify-evenly items-center flex-col"
@@ -56,7 +56,7 @@ const ServiceCardAlt = ({index, name, icon, certificate, link}) => {
           </a>
         </div>
       </motion.div>
-    </Tilt>
+    // </Tilt>
   )
 }
  
