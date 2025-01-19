@@ -10,7 +10,7 @@ const ServiceCard = ({index, name, icon}) => {
   return (
     // <Tilt className = "w-[130px]">
       <motion.div 
-        variants={fadeIn("right", "spring", 0.15 * index, 0.75)}
+        // variants={fadeIn("right", "spring", 0.15 * index, 0.75)}
         className='w-[130px] green-pink-gradient p-[1px] rounded-[20px] shadow-card'
       >
         <div 
@@ -36,7 +36,7 @@ const ServiceCardAlt = ({index, name, icon, certificate, link}) => {
   return (
     // <Tilt className = "w-[250px]">
       <motion.div 
-        variants={fadeIn("right", "spring", 0.15 * index, 0.75)}
+        // variants={fadeIn("right", "spring", 0.15 * index, 0.75)}
         className='w-[250px] green-pink-gradient p-[1px] rounded-[20px] shadow-card'
       >
         <div 
