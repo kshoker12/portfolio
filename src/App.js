@@ -85,7 +85,7 @@ const App = () => {
         <Certifications/>
         <WorkExperience/>
         <Projects/>
-        <Testimonials/>
+        {/* <Testimonials/> */}
         <Contact/>
         <div className='fixed bottom-0 right-0 rounded-full bg-purple-500 px-2 py-1 m-2 hover:px-3 hover:py-2 hover:bg-primarydark ease-in-out duration-200'>
           <a href='#'>
