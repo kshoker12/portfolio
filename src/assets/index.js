@@ -69,12 +69,14 @@ import apnatent from './projects/apnatent.png';
 import starclass from './projects/starclass.png';
 import mma from './projects/mma.png';
 import visualizer from './projects/visualizer.png';
+import compass from './projects/compass.jpg';
 
 import link from './projects/link.png';
 
 export {
   apnatent,
   visualizer,
+  compass,
   starclass,
   link,
   python1,

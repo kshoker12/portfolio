@@ -62,7 +62,8 @@ import {
     apnatent,
     starclass,
     mma,
-    visualizer
+    visualizer,
+    compass
   } from "../assets";
   
   export const navLinks = [
@@ -375,7 +376,7 @@ import {
           color: "pink-text-gradient",
         },
       ],
-      image: jobit,
+      image: compass,
       source_code_link: "https://github.com/",
     },
     {
