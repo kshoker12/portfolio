@@ -356,7 +356,7 @@ import {
         },
       ],
       image: visualizer,
-      source_code_link: "https://github.com/",
+      source_code_link: "https://kshoker12.github.io/portfolio/configurator.html",
     },
     {
       name: "Compass App",
