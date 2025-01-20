@@ -361,7 +361,7 @@ import {
     {
       name: "Compass App",
       description:
-        "Web application that enables users to search for job openings, view estimated salary ranges for positions, and locate available jobs based on their current location.",
+        'React Native application with Django backend which I designed and developed for personal use to manage my responsibilities, finances, and time effectively. Includes various helpful components such as budget tracker, todo list, and weekly goals. The name "Compass App" comes from the fact that it gives my life direction and keeps me on track and hold myself accountable to achieve my goals.',
       tags: [
         {
           name: "React Native",
@@ -377,7 +377,8 @@ import {
         },
       ],
       image: compass,
-      source_code_link: "https://github.com/",
+      isGithub: true,
+      source_code_link: "https://github.com/kshoker12/CompassApp",
     },
     {
       name: "DYR Autocare",
