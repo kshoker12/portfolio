@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/portfolio/static/css/main.94b03d99.css",
-    "main.js": "/portfolio/static/js/main.beda6699.js",
+    "main.js": "/portfolio/static/js/main.c694087d.js",
     "static/js/488.1446b851.chunk.js": "/portfolio/static/js/488.1446b851.chunk.js",
     "static/media/apnatent.png": "/portfolio/static/media/apnatent.e49f85967972d8b7abcf.png",
     "static/media/dyr.png": "/portfolio/static/media/dyr.cf8082de37e0ee944adb.png",
@@ -45,6 +45,7 @@
     "static/media/link.png": "/portfolio/static/media/link.8b84ca58b7e14c50cf76.png",
     "static/media/acehardware.png": "/portfolio/static/media/acehardware.5e0e50f29467ef16bb57.png",
     "static/media/aws.png": "/portfolio/static/media/aws.e29de76774cbd794c76b.png",
+    "static/media/compass.jpg": "/portfolio/static/media/compass.63c26adecc08a4b71396.jpg",
     "static/media/reactNative.webp": "/portfolio/static/media/reactNative.da3aeea09c58a63e1969.webp",
     "static/media/mysql.png": "/portfolio/static/media/mysql.f33981aa5af1f8711cc6.png",
     "static/media/logisticregression.png": "/portfolio/static/media/logisticregression.86de8063ec6e94c0224a.png",
@@ -66,11 +67,11 @@
     "static/media/menu.svg": "/portfolio/static/media/menu.a14e08da817ed339d3849bc81037592d.svg",
     "index.html": "/portfolio/index.html",
     "main.94b03d99.css.map": "/portfolio/static/css/main.94b03d99.css.map",
-    "main.beda6699.js.map": "/portfolio/static/js/main.beda6699.js.map",
+    "main.c694087d.js.map": "/portfolio/static/js/main.c694087d.js.map",
     "488.1446b851.chunk.js.map": "/portfolio/static/js/488.1446b851.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.94b03d99.css",
-    "static/js/main.beda6699.js"
+    "static/js/main.c694087d.js"
   ]
 }
