@@ -33,6 +33,7 @@ import r from './tech/r.png';
 import mysql from './tech/mysql.png';
 import postgres from './tech/postgres.png';
 import redshift from './tech/redshift.webp';
+import php from './tech/php.svg';
 
 import neuralnetworks from './tech/neuralnetworks.png';
 import linearregression from './tech/linearregression.png';
@@ -141,4 +142,5 @@ export {
   sqlcert,
   rice,
   mma,
+  php,
 };

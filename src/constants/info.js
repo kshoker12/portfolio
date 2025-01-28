@@ -63,7 +63,8 @@ import {
     starclass,
     mma,
     visualizer,
-    compass
+    compass,
+    php
   } from "../assets";
   
   export const navLinks = [
@@ -117,6 +118,10 @@ import {
     {
       name: "SQL",
       icon: sql
+    },
+    {
+      name: "PHP",
+      icon: php
     },
     {
       name: "Laravel",
@@ -354,6 +359,10 @@ import {
           name: "Three.js",
           color: "pink-text-gradient",
         },
+        {
+          name: "PHP",
+          color: "orange-text-gradient"
+        }
       ],
       image: visualizer,
       source_code_link: "https://kshoker12.github.io/portfolio/configurator.html",
