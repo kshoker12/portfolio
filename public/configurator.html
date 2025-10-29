@@ -3,108 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Static Page</title>
+    <title>Configurator - Documentation</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            text-align: left;
-            margin-top: 20px;
-            margin-left: 10px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            padding: 40px 20px;
         }
+
+        .container {
+            width: 100%;
+            margin: 0 0;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
         h1 {
-            color: gray;
-        }
-    </style>
-    <style>
-        .vidstyle {
-            width: 300px;
-            height: 300px;
-        }
-        .textelement {
-            margin-right: 20px;
+            font-size: 2em;
+            border-bottom: 1px solid #eaecef;
+            padding-bottom: 9px;
         }
 
-        @media (max-width: 900px) {
-            .adjustable {
-                width: 90vw;
-                height: auto;
-            }
+        h2 {
+            font-size: 1.5em;
+            border-bottom: 1px solid #eaecef;
+            padding-bottom: 9px;
         }
 
-        @media (min-width: 901px) {
-            .adjustable {
-                width: 70vw;
-                height: auto;
-            }
+        h3 {
+            font-size: 1.25em;
         }
 
+        p {
+            margin-bottom: 16px;
+        }
+
+        ul, ol {
+            margin-bottom: 16px;
+            padding-left: 30px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        blockquote {
+            margin: 16px 0;
+            padding: 0 1em;
+            color: #6a737d;
+            border-left: 0.25em solid #dfe2e5;
+        }
+
+        code {
+            background: #f6f8fa;
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.85em;
+        }
+
+        pre {
+            background: #2d2d2d;
+            border-radius: 6px;
+            padding: 16px;
+            overflow: auto;
+            margin-bottom: 16px;
+        }
+
+        pre code {
+            background: transparent;
+            padding: 0;
+            color: #f8f8f2;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin: 16px 0;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #dfe2e5;
+            padding: 6px 13px;
+        }
+
+        th {
+            background: #f6f8fa;
+            font-weight: 600;
+        }
+
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin: 16px 0;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #eaecef;
+            margin: 24px 0;
+        }
         
+        html {
+            scroll-behavior: smooth;
+        }
     </style>
+    
 </head>
-<body class="" style="padding: 10px">
-    <h1>My work at Signify Ledalite</h1>
-    <p class="textelement">I completed a 12-month internship at Signify and have been working part-time with the company for an additional six-months. During my time at Signify, my team and I focused on developing and releasing a new version of LightXpress, a website that enables customers to configure Ledalite products. <br/><br/>
-        The primary objective for the new website was the integration of a 3D Visual Configurator, a new feature which was a revolutionary change compared to the previous text-based configuration methods. I was entrusted with the architecture and implementation of this 3D Configurator, a critical and complex project. This opportunity allowed me to enhance my technical skills and grow as a Software Developer, making it a valuable professional experience. </p>
-    <div>
-        <h2 style="color: black;">3D Configurator</h2>
-        <div>
-            <p class="textelement">
-                In the previous version of LightXpress, fixture patterns of products were difficult to configure and it was hard to map out text-based representations of fixtures into how they would visually appear which caused misunderstanding and confusion. Below is an example of a pattern being configured in the previous version of LightXpress. It's evidently difficult to map out how this would look visually. 
-            </p>
-            <img src="./oldpattern.png" class="adjustable"/>
-        </div>
-        <div>
-            <h4 style="color:black">3D Configurator Demo</h4>
-            <p class="textelement">
-                Below is a demo illustrating 3D Configurator in action. It allows user to visually see how their end-product would appear visually and see their changes in real-time as they configure patterns of fixtures. This tool gives users the confidence to create complex patterns according to their needs while also being user-friendly.
-            </p>
-            <video 
-                src="./visualizerdemoalt.mp4"
-                class="adjustable"
-                controls
-            >
-        </div>  
-        <div>
-            <p class="textelement">
-                The development of the 3D Configurator was a challenging yet highly rewarding project that provided me with the opportunity to learn and apply new tools such as Three.js, React-Three-Fiber, and React-Three-Drei. I was responsible for architecting the 3D Configurator and made key design decisions involving data structures, classes, and algorithms necessary for implementation of this feature.
-<br/><br/>
-Throughout the project, I adopted a systematic approach by documenting my design ideas during each sprint and presenting them to the team for feedback. This collaborative process not only ensured alignment within the team but also minimized unexpected bugs during the implementation phase. 
-<br/><br/>
-One of the most fulfilling aspects of this project was designing all the complex algorithms which the configurator runs on as these were challenging and really made me think critically. 
-            </p>
-        </div>  
+<body>
+    <div class="container" id="content">
+        <p>Loading markdown...</p>
     </div>
-    <div>
-        <h2 style="color: black;">Module Configurator</h2>
-        <div>
-            <p class="textelement">In the previous version of LightXpress, users would need to apply module-specific configurations to modules in a fixture one at a time. This was an inefficient process which could be optimized. Below is the previous version of module-specific configurations in old LightXpress</p>
-            <img
-                src="./oldwiring.png"
-                class="adjustable"
-            />
-        </div>
-        <div>
-            <h4 style="color: black;">Module Configurator Demo</h4>
-            <p class="textelement">The Module Configurator allows user to apply module-specific configurations to multiple modules in a fixture simultaneously with a visual user interface allowing them to visually see configuration changes in real-time and also includes useful options such as 'Select All', 'Select Unselected', and 'Clear Selected'.</p>
-            <video
-                src="./modconfiguratordemo.mp4"
-                class="adjustable"
-                controls
-            >
-        </div>
-        <div>
-            <p class="textelement">Additionally, the Module Configurator serves as a supporting tool for the 3D Configurator and resolve ambiguities such as when user has multiple variations of a fixture to choose from and assists them in selecting desired variation in a simple visual manner.</p>
-            <video
-                src="./modconfiguratordemo2.mp4"
-                class="adjustable"
-                controls
-            >
-        </div>
-    </div>
-    <div>
-        <h2 style="color: black">Final Thoughts</h2>
-        <p class="textelement">Working at Signify Ledalite has been a great experience and I am grateful for the opportunity to work with a team of passionate individuals all working towards a common goal of the completion of LightXpress 5. I'm also grateful for the opportunity to work on meaningful projects which have a real impact on the customers. Signify has been a key part of my journey as a Software Developer and has helped me gain valuable exposure in my field. </p>
-    </div>
+
+    <script>
+        // Configure marked
+        marked.setOptions({ breaks: true, gfm: true });
+
+        const contentDiv = document.getElementById('content');
+
+        fetch('configurator.md')
+            .then(r => r.text())
+            .then(md => {
+                contentDiv.innerHTML = marked.parse(md);
+
+                const slugCounts = {};
+                const toSlug = (text) => (text||'').toLowerCase().trim()
+                    .replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'')
+                    .replace(/\-+/g,'-').replace(/^\-+|\-+$/g,'');
+
+                // Assign IDs to headings
+                const headings = contentDiv.querySelectorAll('h1,h2,h3,h4,h5,h6');
+                headings.forEach(h => {
+                    const base = toSlug(h.textContent);
+                    let slug = base;
+                    if (slugCounts[base] != null) { slugCounts[base]+=1; slug = `${base}-${slugCounts[base]}`; }
+                    else { slugCounts[base]=0; }
+                    if (!h.id) h.id = slug;
+                });
+
+                // Normalize hash links
+                const pageLinks = contentDiv.querySelectorAll('a[href^="#"]');
+                pageLinks.forEach(a => {
+                    const raw = a.getAttribute('href') || '';
+                    const id = decodeURIComponent(raw.replace(/^#/,''));
+                    if (!id) return;
+                    a.setAttribute('href', `#${toSlug(id)}`);
+                });
+
+                // Replace image .mp4/.mov/.webm with <video>
+                const imgs = contentDiv.querySelectorAll('img');
+                imgs.forEach(img => {
+                    let src = img.getAttribute('src') || '';
+                    // Normalize image paths for subpath deployments
+                    if (src.startsWith('/')) {
+                        const normalized = src.replace(/^\//, '');
+                        img.setAttribute('src', normalized);
+                        src = normalized;
+                    }
+                    // Make images responsive and lazy-load them
+                    img.setAttribute('loading', 'lazy');
+                    img.style.maxWidth = '80%';
+                    img.style.height = 'auto';
+                    img.style.borderRadius = '4px';
+
+                    if (/\.(mp4|mov|webm)$/i.test(src)) {
+                        if (src.startsWith('/')) src = src.replace(/^\//,'');
+
+                        const makeSource = (url) => {
+                            const s = document.createElement('source');
+                            s.src = url;
+                            const ext = (url.split('.').pop()||'').toLowerCase();
+                            s.type = ext==='mp4' ? 'video/mp4' : ext==='webm' ? 'video/webm' : ext==='mov' ? 'video/quicktime' : '';
+                            return s;
+                        };
+
+                        const video = document.createElement('video');
+                        video.setAttribute('controls','');
+                        video.setAttribute('playsinline','');
+                        video.setAttribute('preload','metadata');
+                        video.style.width = '100%';
+                        video.style.maxWidth = '100%';
+                        video.style.borderRadius = '6px';
+
+                        video.appendChild(makeSource(src));
+                        if (!/\.mp4$/i.test(src)) {
+                            video.appendChild(makeSource(src.replace(/\.(mov|webm)$/i, '.mp4')));
+                        }
+
+                        const fallback = document.createElement('div');
+                        fallback.style.fontSize = '14px';
+                        fallback.style.marginTop = '8px';
+                        fallback.innerHTML = `<p>Unable to play this video. <a href="${src}" download>Download</a></p>`;
+                        video.appendChild(fallback);
+
+                        img.replaceWith(video);
+                    }
+                });
+
+                // Smooth scroll handling
+                contentDiv.addEventListener('click', e => {
+                    const link = e.target.closest && e.target.closest('a[href^="#"]');
+                    if (!link) return;
+                    const hash = decodeURIComponent(link.getAttribute('href'));
+                    if (!hash || hash === '#') return;
+                    const id = hash.slice(1);
+                    const target = document.getElementById(id);
+                    if (target) {
+                        e.preventDefault();
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        try { history.replaceState(null, '', `#${id}`); } catch(_){}
+                    }
+                });
+            })
+            .catch(err => {
+                contentDiv.innerHTML = `<p style="color:red;">Error loading markdown: ${err.message}</p>`;
+            });
+    </script>
 </body>
 </html>
 

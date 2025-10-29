@@ -386,8 +386,8 @@ import {
         },
       ],
       image: compass,
-      isGithub: true,
-      source_code_link: "https://github.com/kshoker12/CompassApp",
+      isGithub: false,
+      source_code_link: "https://kshoker12.github.io/portfolio/compass-app.html",
     },
     {
       name: "DYR Autocare",
