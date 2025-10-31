@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configurator - Documentation</title>
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <!-- MathJax for math rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         * {
             margin: 0;
@@ -146,6 +149,19 @@
     </div>
 
     <script>
+        // Configure MathJax
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            }
+        };
+
         // Configure marked
         marked.setOptions({ breaks: true, gfm: true });
 
@@ -244,6 +260,22 @@
                         try { history.replaceState(null, '', `#${id}`); } catch(_){}
                     }
                 });
+
+                // Render math equations with MathJax
+                if (window.MathJax && window.MathJax.typesetPromise) {
+                    window.MathJax.typesetPromise([contentDiv]).catch((err) => {
+                        console.error('MathJax rendering error:', err);
+                    });
+                } else {
+                    // If MathJax hasn't loaded yet, wait for it
+                    window.addEventListener('load', () => {
+                        if (window.MathJax && window.MathJax.typesetPromise) {
+                            window.MathJax.typesetPromise([contentDiv]).catch((err) => {
+                                console.error('MathJax rendering error:', err);
+                            });
+                        }
+                    });
+                }
             })
             .catch(err => {
                 contentDiv.innerHTML = `<p style="color:red;">Error loading markdown: ${err.message}</p>`;
