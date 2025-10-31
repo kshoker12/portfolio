@@ -5,9 +5,11 @@ As a ~**1600 ELO** chess player, I developed a fully interactive **3D Chess AI E
 
 Developing this chess engine helped me realize the complexity of good decision-making in chess and humbled me because despite my ELO rating, I struggle to beat the engine on **HARD Mode**, highlighting how subtle positional advantages can dominate games.
 
-![Demo – Feature Showcase](/video/chess.mp4)
+- **Live App**: [`3D Chess AI Engine`](https://main.d12st6uisht1xd.amplifyapp.com)
+- **Frontend Repo**: https://github.com/kshoker12/3D-Chess-App
+- **Backend Repo**: https://github.com/kshoker12/Chess-Engine
 
-[Play a few games against the engine — you might be surprised how tough it is to beat.](https://main.d12st6uisht1xd.amplifyapp.com/)
+![Demo – Feature Showcase](/video/chess.mp4)
 
 ---
 
