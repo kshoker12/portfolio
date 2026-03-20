@@ -40,23 +40,23 @@
                 sans-serif;
             background: #f5f5f5;
             color: #333;
-            padding: 40px 20px;
+            padding: 24px 18px;
         }
 
         .container {
             width: 100%;
             margin: 0 0;
             background: white;
-            padding: 40px;
+            padding: 32px;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            line-height: 1.7;
-            font-size: 16px;
+            line-height: 1.5;
+            font-size: 14px;
         }
 
         h1, h2, h3, h4, h5, h6 {
-            margin-top: 24px;
-            margin-bottom: 16px;
+            margin-top: 14px;
+            margin-bottom: 8px;
             font-weight: 600;
         }
 
@@ -77,20 +77,20 @@
         }
 
         p {
-            margin-bottom: 16px;
-        }
-
-        ul, ol {
-            margin-bottom: 16px;
-            padding-left: 30px;
-        }
-
-        li {
             margin-bottom: 8px;
         }
 
+        ul, ol {
+            margin-bottom: 8px;
+            padding-left: 22px;
+        }
+
+        li {
+            margin-bottom: 2px;
+        }
+
         blockquote {
-            margin: 16px 0;
+            margin: 8px 0;
             padding: 0 1em;
             color: #6a737d;
             border-left: 0.25em solid #dfe2e5;
@@ -107,9 +107,9 @@
         pre {
             background: #2d2d2d;
             border-radius: 6px;
-            padding: 16px;
+            padding: 10px;
             overflow: auto;
-            margin-bottom: 16px;
+            margin-bottom: 8px;
         }
 
         pre code {
@@ -120,13 +120,13 @@
 
         table {
             border-collapse: collapse;
-            margin: 16px 0;
+            margin: 8px 0;
             width: 100%;
         }
 
         th, td {
             border: 1px solid #dfe2e5;
-            padding: 6px 13px;
+            padding: 3px 8px;
         }
 
         th {
@@ -147,13 +147,13 @@
             max-width: 100%;
             height: auto;
             border-radius: 4px;
-            margin: 16px 0;
+            margin: 8px 0;
         }
 
         hr {
             border: 0;
             border-top: 1px solid #eaecef;
-            margin: 24px 0;
+            margin: 10px 0;
         }
         
         html {
@@ -282,6 +282,84 @@
                 // Run Prism syntax highlighting on all code blocks within the content
                 if (window.Prism && typeof window.Prism.highlightAllUnder === 'function') {
                     window.Prism.highlightAllUnder(contentDiv);
+                }
+
+                // Make inline citations like [1], [2], ... clickable and scroll to references.
+                // This turns “[n]” in the article text into a link to “ref-n” in the references list.
+                try {
+                    // Locate the "8 References" heading, then its following <ol> list.
+                    const referencesHeading = Array.from(
+                        contentDiv.querySelectorAll('h1,h2,h3,h4,h5,h6')
+                    ).find(h => {
+                        const t = (h.textContent || '').trim();
+                        return t === '8 References' || t.endsWith('8 References') || t.includes('8 References');
+                    });
+
+                    let refsOl = null;
+                    if (referencesHeading) {
+                        let el = referencesHeading.nextElementSibling;
+                        while (el) {
+                            if (el.tagName === 'OL') { refsOl = el; break; }
+                            el = el.nextElementSibling;
+                        }
+                    }
+
+                    // Assign stable ids to each reference entry (ref-1, ref-2, ...).
+                    if (refsOl) {
+                        const lis = refsOl.querySelectorAll('li');
+                        lis.forEach((li, i) => {
+                            li.id = `ref-${i + 1}`;
+                        });
+                    }
+
+                    // Replace text nodes that contain “[number]” with anchored links.
+                    const citationRegex = /\[(\d+)\]/g;
+                    const walker = document.createTreeWalker(contentDiv, NodeFilter.SHOW_TEXT);
+                    const textNodes = [];
+
+                    while (walker.nextNode()) {
+                        const node = walker.currentNode;
+                        const text = node.nodeValue || '';
+                        if (!citationRegex.test(text)) continue;
+
+                        // Avoid touching inside the references list itself.
+                        if (refsOl && node.parentElement && node.parentElement.closest('ol') === refsOl) continue;
+
+                        // Avoid touching inside existing links.
+                        if (node.parentElement && node.parentElement.closest('a')) continue;
+
+                        citationRegex.lastIndex = 0; // reset for reuse
+                        textNodes.push(node);
+                    }
+
+                    textNodes.forEach((node) => {
+                        const text = node.nodeValue || '';
+                        const matches = [...text.matchAll(/\[(\d+)\]/g)];
+                        if (!matches.length) return;
+
+                        const frag = document.createDocumentFragment();
+                        let lastIndex = 0;
+
+                        for (const m of matches) {
+                            const full = m[0]; // e.g. "[9]"
+                            const n = m[1];    // e.g. "9"
+                            const start = m.index ?? 0;
+
+                            frag.append(text.slice(lastIndex, start));
+
+                            const a = document.createElement('a');
+                            a.href = `#ref-${n}`;
+                            a.textContent = full;
+                            frag.appendChild(a);
+
+                            lastIndex = start + full.length;
+                        }
+
+                        frag.append(text.slice(lastIndex));
+                        node.parentNode.replaceChild(frag, node);
+                    });
+                } catch (e) {
+                    console.error('Clickable citations setup failed:', e);
                 }
 
                 // Render math equations with MathJax
