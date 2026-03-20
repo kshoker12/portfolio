@@ -10,7 +10,7 @@
 - **[Backend Repo](https://github.com/kshoker12/Chess-Engine)** — FastAPI + PyTorch inference
 
 ## 1 Abstract
-This project demonstrates that chess can be effectively modeled as a language problem, where entire games are treated as conversations and individual moves as words. This involves a policy network ($28.2$ million parameter transformer) which predicts the next move autoregressively given the sequence of prior moves. On held-out games, the best move appears in policy's top-$7$ suggestions $\approx 89.2\%$ of the time.
+This project demonstrates that chess can be effectively modeled as a language problem, where entire games are treated as conversations and individual moves as words. This involves a policy network ($28.2$ million parameter transformer) which predicts the next move autoregressively given the sequence of prior moves. On held-out games, the best move appears in policy's top-$7$ suggestions $\approx 89.2%$ of the time.
 
 To correct tactical or long-term errors, the policy is paired with a value network ($10.7$ million parameter transformer) that scores any given board state with a normalized centipawn value, indicating favourability of the board. This value network was further refined over $10$ cycles of self-play reinforcement learning, where the model generated its own games and labeled them using an oracle model (Stockfish 16), which it then used to fine-tune and iteratively improve its evaluation.
 
@@ -170,9 +170,14 @@ These figures indicate strong predictive performance since the best move appears
 **Centipawn Evaluation**  
 Centipawns (cp) are the standard unit for quantifying positional advantage in chess. Positive cp values indicate advantage for the side to move, while negative values indicate disadvantage. A score of $+100$ cp means the board state is worth roughly one extra pawn; scores above $+300$ cp often signal decisive advantage, and very large positive/negative values indicate near-certain wins or losses (e.g., checkmate in few moves).
 
-TODO: Make this more intuitive with an example
 **Complexity of Position Evaluation**  
-Accurately assessing a chess board state is exceptionally difficult due to the game's enormous state space ($\approx 10^{46}$) and branching factor ($\approx 35$ legal moves). Even sophisticated handcrafted rules/heuristics fail to generalize across the full range of tactical and strategic nuances that grandmasters intuitively weigh. Deep learning is therefore essential to approximate the nuanced evaluation that grandmasters intuitively perform.
+Accurately assessing a chess board state is exceptionally difficult due to the game's enormous state space ($\approx 10^{46}$) and branching factor ($\approx 35$ legal moves). 
+
+Even more challenging is that the true value of a piece depends heavily on its position. A knight in the center forking the king and queen can instantly decide the game, while the same knight sitting passively on the edge of the board is worth much less. A pawn on the seventh rank is far stronger than a pawn on its starting square. Material count alone tells you very little and the real evaluation comes from how pieces interact with the specific board geometry at that moment.
+
+Due to this dynamic, non-linear relationship, even sophisticated handcrafted rules and heuristics fail to generalize across the full range of tactical and strategic nuances that grandmasters intuitively weigh. Deep learning is therefore essential: it learns these complex, position-dependent patterns directly from millions of real games rather than relying on static rules.
+
+
 
 **Policy-Value Pairing**  
 The policy network has a top-$7$ accuracy of $\approx 89$% so it provides strong candidate moves, but it can still propose tactical blunders or suboptimal long-term plans. However, pairing a policy network which generates candidate moves and a value network which estimates cp scores for the corresponding board states to re-rank the moves reduces obvious errors and selects moves that lead to the most favorable future states, a classic policy-value decomposition used in AlphaZero [2] and modern engines.
@@ -290,6 +295,9 @@ The table below summarizes progress across iterations, showing validation loss o
 | 5         | 0.08802       | 0.05341       | 70%                           |
 | 6         | 0.08425       | 0.04789       | 69%                           |
 | 7         | 0.08194       | 0.04719       | 72%                           |
+| 8         | 0.08092       | 0.04481       | 67%                           |
+| 9         | 0.07893       | 0.04414       | 65%                           |
+| 10        | 0.07507       | 0.04383       | 62%                           |
 
 ## 5 Algorithms
 
@@ -329,8 +337,6 @@ def TwoStepLookahead(sequence):
 Two-step look-ahead provides immediate tactical awareness and reliably avoids common blunders by focusing on short-term threats and opportunities. However, the two-move horizon limits its ability to handle deeper tactics or subtle positional plans that require more foresight.
 
 Inference is extremely fast with $O(k)$ per forward pass for top-$k$ moves, resulting in $<50$ ms per move on AWS Lambda. The algorithm is deployed as the "easy mode" in the application, offering competitive gameplay with low-latency. 
-
-TODO: Chart against chess.com bots + latency estimation 
 
 
 ### 5.2 Alpha-Beta Pruning (MinMax Search)
@@ -374,8 +380,6 @@ def AlphaBetaPruning(sequence, alpha, beta, depth):
 Alpha-beta pruning delivers significantly smarter and strategic gameplay than shallower methods by effectively reducing the branching factor through pruning and policy-guided move ordering.
 
 Its computational complexity is $O(k^d)$ in the worst case for policy's top-$k$ moves considered at each node until depth $d$, but pruning and prior ordering typically reduces the effective branching factor to $3$, resulting in practical search times of 200–800 ms per move at depth $5$ on RTX A4500 GPU. The algorithm powers the "medium mode" in the application, offering more challenging play for intermediate-to-advanced users.
-
-TODO: Metrics + level 
 
 ### 5.3 Monte Carlo Tree Search (MCTS)
 
@@ -422,8 +426,6 @@ With $400$ simulations per move, MCTS achieves the strongest performance of the 
 
 Latency ranges from $5$–$10$ seconds per move on RunPod’s RTX A4500 GPU. This makes it suitable for the application’s “hard mode,” where deeper thinking is prioritized over instant response. The method fully leverages the power of the policy and value networks, making it the most capable search strategy in the system.
 
-TODO: Metrics + Runtime 
-
 ## 6 Architecture 
 
 ### 6.1 Frontend
@@ -446,7 +448,7 @@ Model strength was evaluated by simulating $10$ games against Chess.com bots of 
 
 | Mode | Algorithm | Estimated strength | Key settings |
 |------|-----------|-------------------|--------------|
-| Easy | Two-Step Look-Ahead Search | $\approx 1200-1400$ ELO | N/A |
+| Easy | Two-Step Look-Ahead Search | $\approx 1300-1500$ ELO | N/A |
 | Medium | Alpha-Beta Pruning / MinMax Search | $\approx 1600-1900$ ELO | Depth $4$ |
 | Hard | Monte Carlo Tree Search (MCTS) | $\approx 2200-2400$ ELO | $400$ simulations |
 
