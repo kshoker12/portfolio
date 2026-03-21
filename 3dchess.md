@@ -1,7 +1,7 @@
 # ♟️ 3D Chess AI Engine 
 **3D Chess Engine • AI-Powered Gameplay • Serverless Architecture**
 
-> **Deprecated:** This page is kept for historical context. For the latest approach and architecture, see the latest write-up: **[Transformed-Based Chess AI Model](https://kshoker12.github.io/portfolio/chess-ai-model.html)**.
+**Deprecated:** This page is kept for historical context. For the latest approach and architecture, see the latest write-up: **[Transformed-Based Chess AI Model](https://kshoker12.github.io/portfolio/chess-ai-model.html)**.
 
 As a ~**1600 ELO** chess player, I developed a fully interactive **3D Chess AI Engine** built to combine my passions for **Chess**, **Machine Learning**, **Full-Stack Development**, and **Cloud Architectures**, into a responsive 3D frontend for immersive gameplay with a backend AI engine that integrates machine learning models trained on grandmaster games. My goal was to build a rich, intelligent, and scalable 3D chess experience while showcasing technical depth across *Data Structures*, *ML Engineering*, *3D Rendering*, and *Serverless Cloud Architecture*. 
 
