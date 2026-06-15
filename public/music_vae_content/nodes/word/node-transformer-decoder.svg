@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 336 236" width="336" preserveAspectRatio="xMidYMid meet" style="background-color: #ffffff; font-family: Arial, sans-serif;">
+  <defs>
+    <marker id="arrow-transformer-decoder" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#7E22CE" />
+    </marker>
+  </defs>
+  <style>
+    text, tspan {
+      text-rendering: geometricPrecision;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .text-title { font-weight: 700; font-size: 25px; fill: #0F172A; }
+    .text-label { font-weight: 600; font-size: 17px; fill: #334155; }
+  </style>
+  <g transform="translate(28, 28)">
+    <rect x="0" y="0" width="280" height="180" fill="#FAF5FF" stroke="#7E22CE" stroke-width="3" rx="16" />
+    <text x="140" y="60" class="text-title" fill="#4C1D95" text-anchor="middle">Transformer Decoder</text>
+    <text x="140" y="90" font-size="17" class="text-label" fill="#7E22CE" text-anchor="middle">(Operating on whole sequence)</text>
+    <path d="M 60 140 L 220 140" fill="none" stroke="#7E22CE" stroke-width="4" marker-end="url(#arrow-transformer-decoder)" />
+    <text x="140" y="172" font-size="17" class="text-label" fill="#7E22CE" text-anchor="middle">Autoregressive</text>
+  </g>
+</svg>

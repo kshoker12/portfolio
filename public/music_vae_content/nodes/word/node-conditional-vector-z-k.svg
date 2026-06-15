@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 356 236" width="356" preserveAspectRatio="xMidYMid meet" style="background-color: #ffffff; font-family: Arial, sans-serif;">
+  
+  <style>
+    text, tspan {
+      text-rendering: geometricPrecision;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .text-label { font-weight: 600; font-size: 17px; fill: #334155; }
+    .math { font-family: 'STIX Two Math', 'Cambria Math', 'Latin Modern Math', 'Times New Roman', serif; font-weight: 500; }
+  </style>
+  <g transform="translate(28, 28)">
+    <rect x="0" y="0" width="300" height="180" fill="#ECFEFF" stroke="#0891B2" stroke-width="3" rx="16" />
+    <text x="150" y="78" font-size="24" class="math" fill="#155E75" text-anchor="middle"><tspan font-style="italic">C</tspan><tspan font-size="17" baseline-shift="sub">k</tspan><tspan> = [</tspan><tspan font-style="italic">Z</tspan><tspan font-size="15" baseline-shift="sub">k</tspan><tspan>; </tspan><tspan font-style="italic">A</tspan><tspan font-size="15" baseline-shift="sub">k</tspan><tspan>] ∈ </tspan><tspan>ℝ</tspan><tspan font-size="16" baseline-shift="super">512</tspan></text>
+    <text x="150" y="112" font-size="17" class="text-label" fill="#0891B2" text-anchor="middle">Bar-wise Conditional Vector</text>
+  </g>
+</svg>

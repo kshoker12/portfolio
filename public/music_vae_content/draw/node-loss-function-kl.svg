@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="22.7205 22.7205 590.559 135.559" width="591" style="font-family: Arial, sans-serif;" height="136">
+  
+  <style>
+    text, tspan {
+      text-rendering: geometricPrecision;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .math { font-family: 'STIX Two Math', 'Cambria Math', 'Latin Modern Math', 'Times New Roman', serif; font-weight: 500; }
+  </style>
+  <g transform="translate(28, 28)">
+    <rect x="0" y="0" width="580" height="125" fill="#FFF1F2" stroke="#E11D48" stroke-width="3" rx="12" />
+    <text x="290" y="48" font-size="22" class="math" text-anchor="middle" fill="#9F1239">
+      <tspan font-style="italic">ℒ</tspan><tspan font-size="15" baseline-shift="sub">KL</tspan><tspan> = </tspan>
+      <tspan font-style="italic">β</tspan><tspan> · </tspan>
+      <tspan font-size="24">D</tspan><tspan font-size="13" baseline-shift="sub">KL</tspan><tspan>(</tspan>
+      <tspan font-style="italic">Q</tspan><tspan font-size="13" baseline-shift="sub">φ</tspan><tspan>(</tspan>
+      <tspan font-style="italic">Z</tspan><tspan font-size="13" baseline-shift="sub">p</tspan><tspan> ∣ </tspan>
+      <tspan font-style="italic">X</tspan><tspan>) ∥ </tspan>
+      <tspan class="math">𝒩</tspan><tspan>(0, </tspan>
+      <tspan font-style="italic">I</tspan><tspan font-size="13" baseline-shift="sub">128</tspan><tspan>))</tspan>
+    </text>
+    <text x="290" y="98" font-size="19" font-weight="bold" fill="#E11D48" text-anchor="middle">β KL Loss</text>
+  </g>
+</svg>

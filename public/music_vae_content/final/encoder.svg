@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 202" width="384" height="202">
+  <rect x="4" y="4" width="376" height="194" rx="10" fill="#E8F3FF" stroke="#007FFF" stroke-width="2" />
+  <text x="192.0" y="29" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#007FFF" text-anchor="middle">Transformer Encoder</text>
+  <rect x="23" y="38" width="338" height="108" rx="6" fill="#ffffff" stroke="#99CCFF" stroke-width="2" />
+  <rect x="98.5" y="66" width="178" height="46" rx="6" fill="#ffffff" stroke="#66B3FF" stroke-width="1.5" />
+  <text x="187.5" y="82" font-family="Arial, sans-serif" font-size="15" font-weight="600" fill="#0066CC" text-anchor="middle">Bidirectional Attention</text>
+  <path d="M 128.5 89.0 L 246.5 89.0" stroke="#0066CC" stroke-width="2" />
+  <polygon points="118.5,89.0 128.5,85.0 128.5,93.0" fill="#0066CC" />
+  <polygon points="256.5,89.0 246.5,85.0 246.5,93.0" fill="#0066CC" />
+  <text x="187.5" y="104" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#0066CC" text-anchor="middle">+ [CLS] Pooling</text>
+  <text x="39.5" y="96.0" font-family="Georgia, serif" font-style="italic" font-size="21" fill="#0055AA" text-anchor="start">X</text>
+  <path d="M 60.5 91.0 L 92.5 91.0" stroke="#007FFF" stroke-width="2" />
+  <polygon points="98.5,91.0 92.5,87.0 92.5,95.0" fill="#007FFF" />
+  <path d="M 276.5 91.0 L 308.5 91.0" stroke="#007FFF" stroke-width="2" />
+  <polygon points="314.5,91.0 308.5,87.0 308.5,95.0" fill="#007FFF" />
+  <text x="322.5" y="99.0" font-family="Georgia, serif" font-style="italic" font-size="30" fill="#0055AA" text-anchor="start">Z<tspan baseline-shift="sub" font-size="18">p</tspan></text>
+  <text x="192.0" y="168" font-family="Arial, sans-serif" font-size="17" font-weight="600" fill="#334155" text-anchor="middle">Global Latent Inference</text>
+  <text x="192.0" y="186" font-family="Arial, sans-serif" font-size="14" fill="#475569" text-anchor="middle">Analyze <tspan font-family="Georgia, serif" font-style="italic">X</tspan> bidirectionally to infer global latent <tspan font-family="Georgia, serif" font-style="italic">Z<tspan baseline-shift="sub" font-size="11">p</tspan></tspan><tspan font-family="Cambria Math, Times New Roman, serif"> ∈ ℝ</tspan><tspan font-family="Cambria Math, Times New Roman, serif" font-size="11" baseline-shift="super">128</tspan></text>
+</svg>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 230" width="360" height="230">
+  <rect x="4" y="4" width="352" height="222" rx="10" fill="#FFF4E6" stroke="#FF8000" stroke-width="2" />
+  <text x="180.0" y="29" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#FF8000" text-anchor="middle">Attribute Embeddings</text>
+  <rect x="23" y="38" width="314" height="136" rx="6" fill="#ffffff" stroke="#FFCC99" stroke-width="2" />
+  <text x="35" y="67" font-family="Cambria Math, Times New Roman, serif" font-size="21" font-weight="500" fill="#DB2777" text-anchor="start"><tspan font-style="italic">A</tspan><tspan font-size="13" baseline-shift="sub">k</tspan><tspan font-family="Arial, sans-serif" font-size="9" font-weight="700" baseline-shift="super">Rhym</tspan></text>
+  <rect x="107" y="50" width="64" height="22" rx="4" fill="#FCE7F3" stroke="#DB2777" stroke-width="1.5" />
+  <text x="139.0" y="67" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#DB2777" text-anchor="middle">0 … 7</text>
+  <path d="M 177 61 L 187 61" stroke="#DB2777" stroke-width="2" />
+  <polygon points="193,61 189,57 189,65" fill="#DB2777" />
+  <rect x="193" y="50" width="14" height="22" rx="2" fill="#BE185D" />
+  <path d="M 207 61 L 213 61" stroke="#64748b" stroke-width="1.5" />
+  <text x="35" y="97" font-family="Cambria Math, Times New Roman, serif" font-size="21" font-weight="500" fill="#059669" text-anchor="start"><tspan font-style="italic">A</tspan><tspan font-size="13" baseline-shift="sub">k</tspan><tspan font-family="Arial, sans-serif" font-size="9" font-weight="700" baseline-shift="super">Poly</tspan></text>
+  <rect x="107" y="80" width="64" height="22" rx="4" fill="#D1FAE5" stroke="#059669" stroke-width="1.5" />
+  <text x="139.0" y="97" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#059669" text-anchor="middle">0 … 7</text>
+  <path d="M 177 91 L 187 91" stroke="#059669" stroke-width="2" />
+  <polygon points="193,91 189,87 189,95" fill="#059669" />
+  <rect x="193" y="80" width="14" height="22" rx="2" fill="#047857" />
+  <path d="M 207 91 L 213 91" stroke="#64748b" stroke-width="1.5" />
+  <text x="35" y="127" font-family="Cambria Math, Times New Roman, serif" font-size="21" font-weight="500" fill="#0284C7" text-anchor="start"><tspan font-style="italic">A</tspan><tspan font-size="13" baseline-shift="sub">k</tspan><tspan font-family="Arial, sans-serif" font-size="9" font-weight="700" baseline-shift="super">Vel</tspan></text>
+  <rect x="107" y="110" width="64" height="22" rx="4" fill="#E0F2FE" stroke="#0284C7" stroke-width="1.5" />
+  <text x="139.0" y="127" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#0284C7" text-anchor="middle">0 … 7</text>
+  <path d="M 177 121 L 187 121" stroke="#0284C7" stroke-width="2" />
+  <polygon points="193,121 189,117 189,125" fill="#0284C7" />
+  <rect x="193" y="110" width="14" height="22" rx="2" fill="#0369A1" />
+  <path d="M 207 121 L 213 121" stroke="#64748b" stroke-width="1.5" />
+  <text x="35" y="157" font-family="Cambria Math, Times New Roman, serif" font-size="21" font-weight="500" fill="#7E22CE" text-anchor="start"><tspan font-style="italic">A</tspan><tspan font-size="13" baseline-shift="sub">k</tspan><tspan font-family="Arial, sans-serif" font-size="9" font-weight="700" baseline-shift="super">Den</tspan></text>
+  <rect x="107" y="140" width="64" height="22" rx="4" fill="#F3E8FF" stroke="#7E22CE" stroke-width="1.5" />
+  <text x="139.0" y="157" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#7E22CE" text-anchor="middle">0 … 7</text>
+  <path d="M 177 151 L 187 151" stroke="#7E22CE" stroke-width="2" />
+  <polygon points="193,151 189,147 189,155" fill="#7E22CE" />
+  <rect x="193" y="140" width="14" height="22" rx="2" fill="#6B21A8" />
+  <path d="M 207 151 L 213 151" stroke="#64748b" stroke-width="1.5" />
+  <path d="M 213 61 L 225 61" stroke="#64748b" stroke-width="1.5" />
+  <path d="M 213 91 L 225 91" stroke="#64748b" stroke-width="1.5" />
+  <path d="M 213 121 L 225 121" stroke="#64748b" stroke-width="1.5" />
+  <path d="M 213 151 L 225 151" stroke="#64748b" stroke-width="1.5" />
+  <path d="M 225 61 L 225 151" stroke="#64748b" stroke-width="1.5" />
+  <path d="M 225 106.0 L 237 106.0" stroke="#64748b" stroke-width="1.5" />
+  <rect x="237" y="62.0" width="32" height="22" fill="#BE185D" />
+  <rect x="237" y="84.0" width="32" height="22" fill="#047857" />
+  <rect x="237" y="106.0" width="32" height="22" fill="#0369A1" />
+  <rect x="237" y="128.0" width="32" height="22" fill="#6B21A8" />
+  <rect x="237" y="62.0" width="32" height="88" fill="none" stroke="#334155" stroke-width="1.5" rx="3" />
+  <path d="M 269 106.0 L 277 106.0" stroke="#FF8000" stroke-width="2" />
+  <polygon points="283,106.0 277,102.0 277,110.0" fill="#FF8000" />
+  <text x="288" y="116.0" font-family="Georgia, serif" font-style="italic" font-size="30" fill="#CC6600" text-anchor="start">A<tspan baseline-shift="sub" font-size="18">k</tspan></text>
+  <text x="180.0" y="196" font-family="Arial, sans-serif" font-size="17" font-weight="600" fill="#334155" text-anchor="middle">Per-Bar Attribute Encoding</text>
+  <text x="180.0" y="214" font-family="Arial, sans-serif" font-size="14" fill="#475569" text-anchor="middle">Maps discrete bar attributes to <tspan font-family="Georgia, serif" font-style="italic">A<tspan baseline-shift="sub" font-size="11">k</tspan></tspan><tspan font-family="Cambria Math, Times New Roman, serif"> ∈ ℝ</tspan><tspan font-family="Cambria Math, Times New Roman, serif" font-size="11" baseline-shift="super">128</tspan></text>
+</svg>

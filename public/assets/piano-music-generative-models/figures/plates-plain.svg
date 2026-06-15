@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="518.4" viewBox="0 0 720 518.4">
+  <rect x="0" y="0" width="720" height="518.4" fill="#ffffff"/>
+
+  <!-- Give the diagram extra vertical breathing room -->
+  <g transform="translate(0, 36)">
+    <!-- Nodes -->
+    <!-- Observed tokens (shaded) -->
+    <circle cx="230" cy="150" r="56" fill="#e5e7eb" stroke="#111111" stroke-width="3.2"/>
+    <circle cx="510" cy="150" r="56" fill="#e5e7eb" stroke="#111111" stroke-width="3.2"/>
+
+    <!-- Condition box -->
+    <rect x="430" y="246" width="160" height="78" rx="16" fill="#ffffff" stroke="#111111" stroke-width="3.2"/>
+
+    <!-- Arrows -->
+    <line x1="286" y1="150" x2="454" y2="150" stroke="#111111" stroke-width="3.2"/>
+    <polygon points="454,150 438,140 438,160" fill="#111111"/>
+
+    <line x1="510" y1="246" x2="510" y2="206" stroke="#111111" stroke-width="3.2"/>
+    <polygon points="510,206 500,222 520,222" fill="#111111"/>
+
+    <!-- Labels (as plain text; MathJax will not typeset inside SVG) -->
+    <text x="230" y="168" text-anchor="middle" font-family="Times New Roman, Times, serif" font-size="44">X<tspan baseline-shift="sub" font-size="28">&lt;T</tspan></text>
+    <text x="510" y="168" text-anchor="middle" font-family="Times New Roman, Times, serif" font-size="44">X<tspan baseline-shift="sub" font-size="28">T</tspan></text>
+    <text x="510" y="298" text-anchor="middle" font-family="Times New Roman, Times, serif" font-size="38">A<tspan baseline-shift="sub" font-size="24">1:K</tspan></text>
+  </g>
+</svg>
+

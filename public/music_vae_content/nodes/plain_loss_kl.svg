@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 228" width="100%" height="100%">
+  <defs>
+    <filter id="shadow-loss-kl" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="grad-loss-kl" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#fff1f2"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="576" height="228" fill="#ffffff"/>
+
+  <rect x="36" y="24" width="504" height="180" rx="12" fill="url(#grad-loss-kl)" stroke="#e11d48" stroke-width="2" filter="url(#shadow-loss-kl)"/>
+
+  <text x="288" y="52" font-family="system-ui, sans-serif" font-size="22" font-weight="700" fill="#9f1239" text-anchor="middle" letter-spacing="0.5">KL Divergence Loss</text>
+
+  <rect x="48" y="66" width="482" height="62" rx="8" fill="#ffffff" stroke="#fda4af" stroke-width="2" stroke-dasharray="4 2"/>
+  <text x="288" y="106" font-family="Cambria Math, Times New Roman, serif" font-size="16" font-weight="500" text-anchor="middle" fill="#9f1239">
+    <tspan>𝓛</tspan><tspan font-size="10" baseline-shift="sub">KL</tspan><tspan> = </tspan>
+    <tspan font-style="italic">β</tspan><tspan> · </tspan>
+    <tspan font-size="17">D</tspan><tspan font-size="10" baseline-shift="sub">KL</tspan><tspan>(</tspan>
+    <tspan font-style="italic">Q</tspan><tspan font-size="10" baseline-shift="sub">φ</tspan><tspan>(</tspan>
+    <tspan font-style="italic">Z</tspan><tspan font-size="10" baseline-shift="sub">p</tspan><tspan> ∣ </tspan>
+    <tspan font-style="italic">X</tspan><tspan>) ∥ </tspan>
+    <tspan>𝒩</tspan><tspan>(0, </tspan>
+    <tspan font-style="italic">I</tspan><tspan font-size="9" baseline-shift="sub">128</tspan><tspan>))</tspan>
+  </text>
+
+  <text x="288" y="152" font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="#334155" text-anchor="middle">KL Regularization</text>
+  <text x="288" y="174" font-family="system-ui, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="middle">
+    Penalizes deviation of approximate posterior from standard normal prior
+  </text>
+</svg>

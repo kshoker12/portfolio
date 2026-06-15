@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 228" width="400" height="228">
+  
+
+  <rect width="400" height="228" fill="#ffffff" />
+
+  <rect x="40" y="24" width="320" height="180" rx="12" fill="#f0fdf4" stroke="#10b981" stroke-width="2"/>
+
+  <text x="200" y="52" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#047857" text-anchor="middle" letter-spacing="0.5">Transformer Encoder</text>
+
+  <rect x="110" y="68" width="180" height="58" rx="8" fill="#ffffff" stroke="#34d399" stroke-width="2"/>
+  <text x="200" y="86" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#059669" text-anchor="middle">Bidirectional Attention</text>
+
+  <path d="M 148 96 L 252 96" stroke="#059669" stroke-width="2.5" />
+  <polygon points="136,96 148,91 148,101" fill="#059669" />
+  <polygon points="264,96 252,91 252,101" fill="#059669" />
+
+  <text x="200" y="118" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#047857" text-anchor="middle">+ [CLS] Pooling</text>
+
+  <text x="72" y="96" font-family="Georgia, serif" font-style="italic" font-size="15" fill="#065f46" text-anchor="middle">X</text>
+  <path d="M 88 101 L 102 101" stroke="#10b981" stroke-width="2"/>
+  <polygon points="110,101 102,97 102,105" fill="#10b981" />
+
+  <path d="M 290 101 L 304 101" stroke="#10b981" stroke-width="2"/>
+  <polygon points="312,101 304,97 304,105" fill="#10b981" />
+  <text x="328" y="96" font-family="Georgia, serif" font-style="italic" font-size="15" fill="#065f46" text-anchor="middle">Z<tspan baseline-shift="sub" font-size="10">p</tspan></text>
+
+  <text x="200" y="152" font-family="Arial, sans-serif" font-size="15" font-weight="600" fill="#334155" text-anchor="middle">Global Latent Inference</text>
+  <text x="200" y="174" font-family="Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="middle">
+    Analyze <tspan font-family="Georgia, serif" font-style="italic">X</tspan> bidirectionally to infer global latent <tspan font-family="Georgia, serif" font-style="italic">Z<tspan baseline-shift="sub" font-size="9">p</tspan></tspan>
+  </text>
+</svg>

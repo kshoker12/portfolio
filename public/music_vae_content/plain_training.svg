@@ -1,0 +1,211 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="35 92 1490 823" width="100%" preserveAspectRatio="xMidYMid meet" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <marker id="arrow-slate" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#334155" />
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#7E22CE" />
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#E11D48" />
+    </marker>
+    
+    <marker id="arrow-pink" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#DB2777" />
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#059669" />
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#0284C7" />
+    </marker>
+    
+    <filter id="shadow-md" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.1" />
+    </filter>
+    <filter id="shadow-sm" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.15" />
+    </filter>
+  </defs>
+
+  <style>
+    text, tspan {
+      text-rendering: geometricPrecision;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .text-title { font-weight: 700; font-size: 25px; fill: #0F172A; }
+    .text-label { font-weight: 600; font-size: 17px; fill: #334155; }
+    .math { font-family: 'STIX Two Math', 'Cambria Math', 'Latin Modern Math', 'Times New Roman', serif; font-weight: 500; }
+    .math-attr { font-family: 'STIX Two Math', 'Cambria Math', 'Latin Modern Math', 'Times New Roman', serif; font-size: 27px; font-weight: 500; }
+    .math-attr-sub { font-size: 17px; baseline-shift: sub; }
+    .math-attr-sup { font-size: 14px; baseline-shift: super; font-weight: 600; }
+    .path-data { fill: none; stroke: #334155; stroke-width: 3; stroke-linejoin: round; }
+    .path-loss { fill: none; stroke: #E11D48; stroke-width: 3; stroke-linejoin: round; stroke-dasharray: 8 6; }
+  </style>
+
+  <path class="path-data" d="M 300 170 L 880 170" marker-end="url(#arrow-slate)" />
+  <rect x="520" y="152" width="160" height="36" fill="#ffffff" rx="4" />
+  <text x="600" y="176" font-size="17" class="text-label" text-anchor="middle">Ground Truth <tspan class="math" font-style="italic">X</tspan></text>
+
+  <path class="path-data" d="M 300 220 L 898 220 L 898 377" marker-end="url(#arrow-slate)" />
+  <rect x="550" y="202" width="200" height="36" fill="#ffffff" rx="4" />
+  <text x="650" y="226" font-size="17" class="text-label" text-anchor="middle">Token History <tspan class="math" font-style="italic">X</tspan><tspan class="math" font-style="italic" font-size="13" baseline-shift="sub">1:t−1</tspan></text>
+
+  <path class="path-data" d="M 250 340 L 250 497" marker-end="url(#arrow-slate)" />
+  <rect x="175" y="385" width="150" height="36" fill="#ffffff" rx="4" />
+  <text x="250" y="409" font-size="17" class="text-label" text-anchor="middle">Extract Attributes</text>
+
+  <path class="path-data" d="M 550 650 L 590 650" marker-end="url(#arrow-slate)" />
+
+  <path class="path-data" d="M 720 650 L 773 650" marker-end="url(#arrow-slate)" />
+
+  <path d="M 831 650 L 898 650 L 898 563" fill="none" stroke="#7E22CE" stroke-width="4" stroke-linejoin="round" marker-end="url(#arrow-purple)" />
+  <rect x="805" y="660" width="160" height="36" fill="#ffffff" rx="4" />
+  <text x="903" y="684" font-size="17" font-weight="700" fill="#7E22CE" text-anchor="middle">FiLM Injection</text>
+
+  <path class="path-data" d="M 1038 470 L 1150 470 L 1150 660" marker-end="url(#arrow-slate)" />
+  <rect x="1045" y="448" width="100" height="36" fill="#ffffff" rx="4" />
+  <text x="1095" y="472" font-size="17" class="text-label" text-anchor="middle">Generate</text>
+
+  <path class="path-loss" d="M 1250 660 L 1250 230" marker-end="url(#arrow-red)" />
+  <rect x="1175" y="440" width="150" height="36" fill="#ffffff" rx="4" />
+  <text x="1250" y="464" font-size="17" font-weight="700" fill="#E11D48" text-anchor="middle">Prediction <tspan class="math" font-style="italic">X′</tspan></text>
+
+
+  <g transform="translate(100, 50)">
+    <rect x="60" y="50" width="100" height="120" fill="#ffffff" stroke="#0F172A" stroke-width="2" />
+    <text x="75" y="90" font-size="33" fill="#0F172A">♫</text>
+    <text x="110" y="145" font-size="16" class="text-label" text-anchor="middle">Bar K</text>
+    
+    <rect x="30" y="80" width="100" height="120" fill="#ffffff" stroke="#0F172A" stroke-width="2" />
+    <text x="45" y="120" font-size="33" fill="#0F172A">♫</text>
+    <text x="80" y="175" font-size="16" class="text-label" text-anchor="middle">Bar 2</text>
+    
+    <rect x="0" y="110" width="100" height="120" fill="#ffffff" stroke="#0F172A" stroke-width="2" filter="url(#shadow-sm)" />
+    <text x="15" y="150" font-size="33" fill="#0F172A">♫</text>
+    <text x="50" y="205" font-size="16" class="text-label" text-anchor="middle">Bar 1</text>
+    
+    <text x="150" y="275" font-size="27" class="math" fill="#0F172A" text-anchor="middle">
+      <tspan font-style="italic">X</tspan><tspan font-style="normal"> = { </tspan>
+      <tspan font-style="italic">X</tspan><tspan font-size="18" baseline-shift="sub">1</tspan><tspan font-style="normal">, …, </tspan>
+      <tspan font-style="italic">X</tspan><tspan font-size="18" baseline-shift="sub">K</tspan><tspan font-style="normal"> }</tspan>
+    </text>
+  </g>
+
+  <g transform="translate(50, 500)">
+    <rect x="0" y="0" width="500" height="300" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="6 4" rx="12" />
+    <text x="250" y="40" class="text-title" text-anchor="middle">Discrete Attribute Embeddings</text>
+    
+    <text x="100" y="96" class="math-attr" fill="#DB2777" text-anchor="end">
+      <tspan font-style="italic">a</tspan><tspan class="math-attr-sub">k</tspan>
+    </text>
+    <text x="102" y="88" class="math-attr-sup" fill="#DB2777" text-anchor="start">rhym</text>
+    <rect x="140" y="75" width="80" height="30" fill="#FCE7F3" stroke="#DB2777" stroke-width="1.5" rx="4" />
+    <text x="180" y="96" font-size="17" font-weight="bold" fill="#DB2777" text-anchor="middle">0 … 7</text>
+    <path d="M 230 90 L 260 90" fill="none" stroke="#DB2777" stroke-width="2" marker-end="url(#arrow-pink)" />
+    <rect x="275" y="75" width="20" height="30" fill="#BE185D" rx="2" />
+    
+    <text x="100" y="146" class="math-attr" fill="#059669" text-anchor="end">
+      <tspan font-style="italic">a</tspan><tspan class="math-attr-sub">k</tspan>
+    </text>
+    <text x="102" y="138" class="math-attr-sup" fill="#059669" text-anchor="start">poly</text>
+    <rect x="140" y="125" width="80" height="30" fill="#D1FAE5" stroke="#059669" stroke-width="1.5" rx="4" />
+    <text x="180" y="146" font-size="17" font-weight="bold" fill="#059669" text-anchor="middle">0 … 7</text>
+    <path d="M 230 140 L 260 140" fill="none" stroke="#059669" stroke-width="2" marker-end="url(#arrow-green)" />
+    <rect x="275" y="125" width="20" height="30" fill="#047857" rx="2" />
+    
+    <text x="100" y="196" class="math-attr" fill="#0284C7" text-anchor="end">
+      <tspan font-style="italic">a</tspan><tspan class="math-attr-sub">k</tspan>
+    </text>
+    <text x="102" y="188" class="math-attr-sup" fill="#0284C7" text-anchor="start">vel</text>
+    <rect x="140" y="175" width="80" height="30" fill="#E0F2FE" stroke="#0284C7" stroke-width="1.5" rx="4" />
+    <text x="180" y="196" font-size="17" font-weight="bold" fill="#0284C7" text-anchor="middle">0 … 7</text>
+    <path d="M 230 190 L 260 190" fill="none" stroke="#0284C7" stroke-width="2" marker-end="url(#arrow-blue)" />
+    <rect x="275" y="175" width="20" height="30" fill="#0369A1" rx="2" />
+    
+    <text x="100" y="246" class="math-attr" fill="#7E22CE" text-anchor="end">
+      <tspan font-style="italic">a</tspan><tspan class="math-attr-sub">k</tspan>
+    </text>
+    <text x="102" y="238" class="math-attr-sup" fill="#7E22CE" text-anchor="start">den</text>
+    <rect x="140" y="225" width="80" height="30" fill="#F3E8FF" stroke="#7E22CE" stroke-width="1.5" rx="4" />
+    <text x="180" y="246" font-size="17" font-weight="bold" fill="#7E22CE" text-anchor="middle">0 … 7</text>
+    <path d="M 230 240 L 260 240" fill="none" stroke="#7E22CE" stroke-width="2" marker-end="url(#arrow-purple)" />
+    <rect x="275" y="225" width="20" height="30" fill="#6B21A8" rx="2" />
+
+    <path d="M 295 90 L 335 90" fill="none" stroke="#64748B" stroke-width="3" />
+    <path d="M 295 140 L 335 140" fill="none" stroke="#64748B" stroke-width="3" />
+    <path d="M 295 190 L 335 190" fill="none" stroke="#64748B" stroke-width="3" />
+    <path d="M 295 240 L 335 240" fill="none" stroke="#64748B" stroke-width="3" />
+    <path d="M 335 90 L 335 240" fill="none" stroke="#64748B" stroke-width="3" />
+    <path d="M 335 165 L 388 165" fill="none" stroke="#64748B" stroke-width="3" />
+
+    <g transform="translate(388, 121)">
+      <rect x="0" y="0" width="36" height="22" fill="#BE185D" rx="2" />
+      <rect x="0" y="22" width="36" height="22" fill="#047857" rx="2" />
+      <rect x="0" y="44" width="36" height="22" fill="#0369A1" rx="2" />
+      <rect x="0" y="66" width="36" height="22" fill="#6B21A8" rx="2" />
+      <rect x="0" y="0" width="36" height="88" fill="none" stroke="#0F172A" stroke-width="2" rx="3" />
+    </g>
+
+    <text x="406" y="232" font-size="31" class="math" fill="#0F172A" text-anchor="middle">
+      <tspan font-style="italic">A</tspan><tspan font-size="20" baseline-shift="sub">k</tspan><tspan> ∈ </tspan><tspan>ℝ</tspan><tspan font-size="18" baseline-shift="super">128</tspan>
+    </text>
+  </g>
+
+  <g transform="translate(600, 610)">
+    <rect x="0" y="0" width="120" height="80" fill="#ffffff" stroke="#0F172A" stroke-width="2.5" rx="8" filter="url(#shadow-sm)" />
+    <text x="60" y="46" font-size="21" font-weight="bold" fill="#0F172A" text-anchor="middle">Linear</text>
+  </g>
+
+  <g transform="translate(775, 606)">
+    <rect x="0" y="0" width="56" height="88" fill="#7E22CE" stroke="#5B21B6" stroke-width="2.5" rx="6" filter="url(#shadow-sm)" />
+    <text x="28" y="116" font-size="29" class="math" fill="#7E22CE" text-anchor="middle">
+      <tspan font-style="italic">C</tspan><tspan font-size="19" baseline-shift="sub">k</tspan><tspan> ∈ </tspan><tspan>ℝ</tspan><tspan font-size="17" baseline-shift="super">512</tspan>
+    </text>
+  </g>
+
+  <g transform="translate(758, 380)">
+    <rect x="0" y="0" width="280" height="180" fill="#FAF5FF" stroke="#7E22CE" stroke-width="3" rx="16" filter="url(#shadow-md)" />
+    <text x="140" y="60" class="text-title" fill="#4C1D95" text-anchor="middle">Transformer Decoder</text>
+    <text x="140" y="90" font-size="17" class="text-label" fill="#7E22CE" text-anchor="middle">(Autoregressive Generation)</text>
+    
+    <path d="M 60 140 L 220 140" fill="none" stroke="#7E22CE" stroke-width="4" marker-end="url(#arrow-purple)" />
+  </g>
+
+  <g transform="translate(1150, 660)">
+    <rect x="40" y="0" width="100" height="120" fill="#ffffff" stroke="#0F172A" stroke-width="2" />
+    <text x="55" y="40" font-size="33" fill="#0F172A">♫</text>
+    <text x="90" y="95" font-size="16" class="text-label" text-anchor="middle">Bar K</text>
+    
+    <rect x="20" y="30" width="100" height="120" fill="#ffffff" stroke="#0F172A" stroke-width="2" />
+    <text x="35" y="70" font-size="33" fill="#0F172A">♫</text>
+    <text x="70" y="125" font-size="16" class="text-label" text-anchor="middle">Bar 2</text>
+    
+    <rect x="0" y="60" width="100" height="120" fill="#ffffff" stroke="#0F172A" stroke-width="2" filter="url(#shadow-sm)" />
+    <text x="15" y="100" font-size="33" fill="#0F172A">♫</text>
+    <text x="50" y="155" font-size="16" class="text-label" text-anchor="middle">Bar 1</text>
+    
+    <text x="60" y="235" font-size="27" class="math" fill="#0F172A" text-anchor="middle">
+      <tspan font-style="italic">X′</tspan><tspan font-style="normal"> = { </tspan>
+      <tspan font-style="italic">X′</tspan><tspan font-size="18" baseline-shift="sub">1</tspan><tspan font-style="normal">, …, </tspan>
+      <tspan font-style="italic">X′</tspan><tspan font-size="18" baseline-shift="sub">K</tspan><tspan font-style="normal"> }</tspan>
+    </text>
+  </g>
+
+  <g transform="translate(935, 100)">
+    <rect x="0" y="0" width="580" height="125" fill="#FFF1F2" stroke="#E11D48" stroke-width="3" rx="12" filter="url(#shadow-md)" />
+
+    <text x="290" y="48" font-size="25" class="math" text-anchor="middle" fill="#9F1239">
+      <tspan font-style="italic">ℒ</tspan><tspan font-size="16" baseline-shift="sub">CE</tspan><tspan> = −</tspan><tspan>𝔼</tspan><tspan>[ </tspan>
+      <tspan font-size="27">∑</tspan><tspan font-size="14" baseline-shift="sub">t</tspan><tspan> log </tspan>
+      <tspan font-style="italic">P</tspan><tspan font-size="15" baseline-shift="sub">θ</tspan><tspan>(</tspan>
+      <tspan font-style="italic">X</tspan><tspan font-size="15" baseline-shift="sub">t</tspan><tspan> ∣ </tspan>
+      <tspan font-style="italic">X</tspan><tspan font-size="14" baseline-shift="sub">1:t−1</tspan><tspan>, </tspan>
+      <tspan font-style="italic">C</tspan><tspan font-size="14" baseline-shift="sub">k(t)</tspan><tspan> ) ]</tspan>
+    </text>
+
+    <text x="290" y="98" font-size="19" font-weight="bold" fill="#E11D48" text-anchor="middle">Reconstruction Loss</text>
+  </g>
+
+</svg>

@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="35.2205 19.2205 329.559 189.559" width="330" height="190">
+  <rect x="40" y="24" width="320" height="180" rx="12" fill="#fff1f2" stroke="#e11d48" stroke-width="2" />
+
+  <text x="200" y="52" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#9f1239" text-anchor="middle" letter-spacing="0.5">Reconstruction Loss</text>
+
+  <rect x="52" y="66" width="296" height="62" rx="8" fill="#ffffff" stroke="#fda4af" stroke-width="2" />
+  <text x="200" y="106" font-family="Cambria Math, Times New Roman, serif" font-size="16" font-weight="500" text-anchor="middle" fill="#9f1239">
+    <tspan>𝓛</tspan><tspan font-size="10" baseline-shift="sub">CE</tspan><tspan> = −</tspan><tspan>𝔼</tspan><tspan>[ </tspan>
+    <tspan font-size="17">∑</tspan><tspan font-size="10" baseline-shift="sub">t</tspan><tspan> log </tspan>
+    <tspan font-style="italic">P</tspan><tspan font-size="10" baseline-shift="sub">θ</tspan><tspan>(</tspan>
+    <tspan font-style="italic">X</tspan><tspan font-size="10" baseline-shift="sub">t</tspan><tspan> ∣ </tspan>
+    <tspan font-style="italic">X</tspan><tspan font-size="9" baseline-shift="sub">1:t−1</tspan><tspan>, </tspan>
+    <tspan font-style="italic">C</tspan><tspan font-size="9" baseline-shift="sub">k(t)</tspan><tspan> ) ]</tspan>
+  </text>
+
+  <text x="200" y="152" font-family="Arial, sans-serif" font-size="15" font-weight="600" fill="#334155" text-anchor="middle">Cross-Entropy Objective</text>
+  <text x="200" y="174" font-family="Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="middle">
+    Token-wise negative log-likelihood of ground-truth <tspan font-family="Georgia, serif" font-style="italic">X</tspan>
+  </text>
+</svg>

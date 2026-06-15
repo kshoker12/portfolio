@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 428 202" width="428" height="202">
+  <rect x="4" y="4" width="420" height="194" rx="10" fill="#E8F3FF" stroke="#007FFF" stroke-width="2" />
+  <text x="214.0" y="29" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#007FFF" text-anchor="middle">GRU Conductor</text>
+  <rect x="23" y="38" width="382" height="108" rx="6" fill="#ffffff" stroke="#99CCFF" stroke-width="2" />
+  <rect x="122.0" y="66" width="178" height="46" rx="6" fill="#ffffff" stroke="#66B3FF" stroke-width="1.5" />
+  <text x="211.0" y="82" font-family="Arial, sans-serif" font-size="15" font-weight="600" fill="#0066CC" text-anchor="middle">2-Layer GRU</text>
+  <path d="M 135.0 89.0 L 253.0 89.0" stroke="#0066CC" stroke-width="2" />
+  <polygon points="259.0,89.0 253.0,85.0 253.0,93.0" fill="#0066CC" />
+  <text x="211.0" y="104" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#0066CC" text-anchor="middle">+ Bar Index Embedding</text>
+  <text x="58.0" y="96.0" font-family="Georgia, serif" font-style="italic" font-size="21" fill="#0055AA" text-anchor="start">Z<tspan baseline-shift="sub" font-size="13">p</tspan></text>
+  <path d="M 84.0 91.0 L 116.0 91.0" stroke="#007FFF" stroke-width="2" />
+  <polygon points="122.0,91.0 116.0,87.0 116.0,95.0" fill="#007FFF" />
+  <path d="M 300.0 91.0 L 332.0 91.0" stroke="#007FFF" stroke-width="2" />
+  <polygon points="338.0,91.0 332.0,87.0 332.0,95.0" fill="#007FFF" />
+  <text x="346.0" y="99.0" font-family="Georgia, serif" font-style="italic" font-size="30" fill="#0055AA" text-anchor="start">Z<tspan baseline-shift="sub" font-size="18">k</tspan></text>
+  <text x="214.0" y="168" font-family="Arial, sans-serif" font-size="17" font-weight="600" fill="#334155" text-anchor="middle">Temporal Latent Translation</text>
+  <text x="214.0" y="186" font-family="Arial, sans-serif" font-size="14" fill="#475569" text-anchor="middle">Translates global <tspan font-family="Georgia, serif" font-style="italic">Z<tspan baseline-shift="sub" font-size="11">p</tspan></tspan><tspan font-family="Cambria Math, Times New Roman, serif"> ∈ ℝ</tspan><tspan font-family="Cambria Math, Times New Roman, serif" font-size="11" baseline-shift="super">128</tspan> into bar latents <tspan font-family="Georgia, serif" font-style="italic">Z<tspan baseline-shift="sub" font-size="11">1</tspan>, …, Z<tspan baseline-shift="sub" font-size="11">K</tspan></tspan><tspan font-family="Cambria Math, Times New Roman, serif"> ∈ ℝ</tspan><tspan font-family="Cambria Math, Times New Roman, serif" font-size="11" baseline-shift="super">384</tspan></text>
+</svg>

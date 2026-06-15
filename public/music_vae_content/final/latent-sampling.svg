@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 410 162" width="410" height="162">
+  <rect x="4" y="4" width="402" height="154" rx="10" fill="#E8F3FF" stroke="#007FFF" stroke-width="2" />
+  <text x="205.0" y="29" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#007FFF" text-anchor="middle">Latent Sampling</text>
+  <rect x="23" y="38" width="364" height="72" rx="6" fill="#ffffff" stroke="#99CCFF" stroke-width="2" />
+  <text x="205.0" y="84.0" font-family="Cambria Math, Times New Roman, serif" font-size="30" font-weight="500" text-anchor="middle" fill="#0055AA"><tspan font-family="Georgia, serif" font-style="italic">Z</tspan><tspan font-family="Cambria Math, Times New Roman, serif" font-size="18" baseline-shift="sub">p</tspan><tspan font-family="Cambria Math, Times New Roman, serif"> ∼ </tspan><tspan font-family="Cambria Math, Times New Roman, serif">𝒩</tspan><tspan font-family="Cambria Math, Times New Roman, serif">(0, </tspan><tspan font-family="Cambria Math, Times New Roman, serif" font-style="italic">I</tspan><tspan font-family="Cambria Math, Times New Roman, serif" font-size="14" baseline-shift="sub">128</tspan><tspan font-family="Cambria Math, Times New Roman, serif">)</tspan></text>
+  <text x="205.0" y="132" font-family="Arial, sans-serif" font-size="14" fill="#475569" text-anchor="middle">Sample <tspan font-family="Georgia, serif" font-style="italic">Z<tspan baseline-shift="sub" font-size="11">p</tspan></tspan> from the standard normal prior</text>
+</svg>

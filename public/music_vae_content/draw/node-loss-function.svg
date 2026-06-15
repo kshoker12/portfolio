@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="22.7205 22.7205 590.559 135.559" width="591" style="font-family: Arial, sans-serif;" height="136">
+  <defs>
+    <marker id="arrow-pink" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#DB2777" />
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#059669" />
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#0284C7" />
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#7E22CE" />
+    </marker>
+    <marker id="arrow-cyan" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#0891B2" />
+    </marker>
+  </defs>
+  <style>
+    text, tspan {
+      text-rendering: geometricPrecision;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .text-title { font-weight: 700; font-size: 25px; fill: #0F172A; }
+    .text-label { font-weight: 600; font-size: 17px; fill: #334155; }
+    .math { font-family: 'STIX Two Math', 'Cambria Math', 'Latin Modern Math', 'Times New Roman', serif; font-weight: 500; }
+    .math-attr { font-family: 'STIX Two Math', 'Cambria Math', 'Latin Modern Math', 'Times New Roman', serif; font-size: 27px; font-weight: 500; }
+    .math-attr-sub { font-size: 17px; baseline-shift: sub; }
+    .math-attr-sup { font-size: 14px; baseline-shift: super; font-weight: 600; }
+  </style>
+
+  <g transform="translate(28, 28)">
+    <rect x="0" y="0" width="580" height="125" fill="#FFF1F2" stroke="#E11D48" stroke-width="3" rx="12" />
+    <text x="290" y="48" font-size="25" class="math" text-anchor="middle" fill="#9F1239">
+      <tspan font-style="italic">ℒ</tspan><tspan font-size="16" baseline-shift="sub">CE</tspan><tspan> = −</tspan><tspan>𝔼</tspan><tspan>[ </tspan>
+      <tspan font-size="27">∑</tspan><tspan font-size="14" baseline-shift="sub">t</tspan><tspan> log </tspan>
+      <tspan font-style="italic">P</tspan><tspan font-size="15" baseline-shift="sub">θ</tspan><tspan>(</tspan>
+      <tspan font-style="italic">X</tspan><tspan font-size="15" baseline-shift="sub">t</tspan><tspan> ∣ </tspan>
+      <tspan font-style="italic">X</tspan><tspan font-size="14" baseline-shift="sub">1:t−1</tspan><tspan>, </tspan>
+      <tspan font-style="italic">C</tspan><tspan font-size="14" baseline-shift="sub">k(t)</tspan><tspan> ) ]</tspan>
+    </text>
+    <text x="290" y="98" font-size="19" font-weight="bold" fill="#E11D48" text-anchor="middle">Reconstruction Loss</text>
+  </g>
+
+</svg>

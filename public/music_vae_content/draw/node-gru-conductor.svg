@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="22.7205 22.7205 290.559 190.559" width="291" style="font-family: Arial, sans-serif;" height="191">
+  <defs>
+    <marker id="arrow-gru-conductor" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#047857" />
+    </marker>
+  </defs>
+  <style>
+    text, tspan {
+      text-rendering: geometricPrecision;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .text-title { font-weight: 700; font-size: 25px; fill: #0F172A; }
+    .text-label { font-weight: 600; font-size: 17px; fill: #334155; }
+    .math { font-family: 'STIX Two Math', 'Cambria Math', 'Latin Modern Math', 'Times New Roman', serif; font-weight: 500; }
+  </style>
+  <g transform="translate(28, 28)">
+    <rect x="0" y="0" width="280" height="180" fill="#ECFDF5" stroke="#059669" stroke-width="3" rx="16" />
+    <text x="140" y="60" class="text-title" fill="#065F46" text-anchor="middle">GRU Conductor</text>
+    <text x="140" y="90" font-size="17" class="text-label" fill="#047857" text-anchor="middle">(Operating on <tspan class="math" font-style="italic">Z</tspan><tspan class="math" font-style="italic" font-size="13" baseline-shift="sub">p</tspan>)</text>
+    <path d="M 60 140 L 220 140" fill="none" stroke="#047857" stroke-width="4" marker-end="url(#arrow-gru-conductor)" />
+    <text x="140" y="172" font-size="17" class="text-label" fill="#047857" text-anchor="middle">Autoregressive</text>
+  </g>
+</svg>
