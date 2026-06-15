@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="420" viewBox="0 0 960 420">
+  <rect x="0" y="0" width="960" height="420" fill="#ffffff"/>
+  <rect x="24" y="24" width="912" height="372" rx="12" fill="#f6f8fa" stroke="#dfe2e5"/>
+
+  <text x="48" y="76" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif"
+        font-size="22" fill="#24292f" font-weight="600">
+    Architecture diagram placeholder
+  </text>
+  <text x="48" y="108" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif"
+        font-size="14" fill="#57606a">
+    Replace this SVG with an exported model architecture diagram.
+  </text>
+
+  <!-- Blocks -->
+  <rect x="120" y="160" width="200" height="70" rx="10" fill="#ffffff" stroke="#8c959f"/>
+  <text x="220" y="200" text-anchor="middle"
+        font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif"
+        font-size="14" fill="#24292f" font-weight="600">Tokenizer</text>
+
+  <rect x="380" y="160" width="200" height="70" rx="10" fill="#ffffff" stroke="#8c959f"/>
+  <text x="480" y="192" text-anchor="middle"
+        font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif"
+        font-size="14" fill="#24292f" font-weight="600">Transformer</text>
+  <text x="480" y="212" text-anchor="middle"
+        font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif"
+        font-size="12" fill="#57606a">Decoder / VAE parts</text>
+
+  <rect x="640" y="160" width="200" height="70" rx="10" fill="#ffffff" stroke="#8c959f"/>
+  <text x="740" y="200" text-anchor="middle"
+        font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif"
+        font-size="14" fill="#24292f" font-weight="600">MIDI Render</text>
+
+  <!-- Arrows -->
+  <line x1="320" y1="195" x2="380" y2="195" stroke="#57606a" stroke-width="2"/>
+  <polygon points="380,195 372,189 372,201" fill="#57606a"/>
+
+  <line x1="580" y1="195" x2="640" y2="195" stroke="#57606a" stroke-width="2"/>
+  <polygon points="640,195 632,189 632,201" fill="#57606a"/>
+
+  <!-- Conditioning input -->
+  <rect x="380" y="265" width="200" height="54" rx="10" fill="#fff8c5" stroke="#9a6700"/>
+  <text x="480" y="297" text-anchor="middle"
+        font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif"
+        font-size="13" fill="#9a6700" font-weight="600">Attributes / FiLM</text>
+  <line x1="480" y1="265" x2="480" y2="230" stroke="#9a6700" stroke-width="2"/>
+  <polygon points="480,230 474,238 486,238" fill="#9a6700"/>
+</svg>
+

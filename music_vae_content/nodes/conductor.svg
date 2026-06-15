@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 228" width="100%" height="100%">
+  <defs>
+    <filter id="shadow-gru" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="grad-gru" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#faf5ff" />
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="228" fill="#ffffff" />
+
+  <rect x="40" y="24" width="320" height="180" rx="12" fill="url(#grad-gru)" stroke="#8b5cf6" stroke-width="2" filter="url(#shadow-gru)"/>
+
+  <text x="200" y="52" font-family="system-ui, sans-serif" font-size="22" font-weight="700" fill="#5b21b6" text-anchor="middle" letter-spacing="0.5">GRU Conductor</text>
+
+  <rect x="110" y="68" width="180" height="58" rx="8" fill="#ffffff" stroke="#a78bfa" stroke-width="2" stroke-dasharray="4 2"/>
+  <text x="200" y="86" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#7c3aed" text-anchor="middle">Autoregressive GRU</text>
+  <text x="200" y="118" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#5b21b6" text-anchor="middle">+ 2-Layer Recurrence</text>
+
+  <text x="68" y="96" font-family="Georgia, serif" font-style="italic" font-size="15" fill="#4c1d95" text-anchor="middle">Z<tspan baseline-shift="sub" font-size="10">p</tspan></text>
+  <path d="M 84 101 L 102 101" stroke="#8b5cf6" stroke-width="2"/>
+  <polygon points="110,101 102,97 102,105" fill="#8b5cf6" />
+
+  <path d="M 290 101 L 304 101" stroke="#8b5cf6" stroke-width="2"/>
+  <polygon points="312,101 304,97 304,105" fill="#8b5cf6" />
+  <text x="328" y="96" font-family="Georgia, serif" font-style="italic" font-size="15" fill="#4c1d95" text-anchor="middle">Z<tspan baseline-shift="sub" font-size="10">k</tspan></text>
+
+  <text x="200" y="152" font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="#334155" text-anchor="middle">Temporal Latent Translation</text>
+  <text x="200" y="174" font-family="system-ui, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="middle">
+    Translates global <tspan font-family="Georgia, serif" font-style="italic">Z<tspan baseline-shift="sub" font-size="9">p</tspan></tspan> into bar latents <tspan font-family="Georgia, serif" font-style="italic">Z<tspan baseline-shift="sub" font-size="9">1</tspan>, …, Z<tspan baseline-shift="sub" font-size="9">K</tspan></tspan>
+  </text>
+</svg>

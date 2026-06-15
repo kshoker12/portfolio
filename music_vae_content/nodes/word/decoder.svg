@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 228" width="400" height="228">
+  
+
+  <rect width="400" height="228" fill="#ffffff" />
+
+  <rect x="40" y="24" width="320" height="180" rx="12" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+
+  <text x="200" y="48" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#1e40af" text-anchor="middle" letter-spacing="0.5">Transformer Decoder</text>
+
+  <rect x="125" y="58" width="150" height="26" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="200" y="76" font-family="Arial, sans-serif" font-size="13" font-weight="600" fill="#1e40af" text-anchor="middle">
+    Bar Condition <tspan font-family="Georgia, serif" font-style="italic">C<tspan baseline-shift="sub" font-size="9">k</tspan></tspan>
+  </text>
+
+  <path d="M 200 84 L 200 94" stroke="#2563eb" stroke-width="2"/>
+  <polygon points="200,100 196,92 204,92" fill="#2563eb" />
+
+  <rect x="110" y="100" width="180" height="54" rx="8" fill="#ffffff" stroke="#60a5fa" stroke-width="2"/>
+  <text x="200" y="118" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#3b82f6" text-anchor="middle">Causal Attention</text>
+  <text x="200" y="140" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#7E22CE" text-anchor="middle">+ FiLM Modulation</text>
+
+  <text x="72" y="126" font-family="Georgia, serif" font-style="italic" font-size="15" fill="#1e3a8a" text-anchor="middle">X<tspan baseline-shift="sub" font-size="10">&lt;t</tspan></text>
+  <path d="M 88 131 L 102 131" stroke="#3b82f6" stroke-width="2"/>
+  <polygon points="110,131 102,127 102,135" fill="#3b82f6" />
+
+  <path d="M 290 131 L 304 131" stroke="#3b82f6" stroke-width="2"/>
+  <polygon points="312,131 304,127 304,135" fill="#3b82f6" />
+  <text x="328" y="126" font-family="Georgia, serif" font-style="italic" font-size="15" fill="#1e3a8a" text-anchor="middle">X<tspan baseline-shift="sub" font-size="10">t</tspan></text>
+
+  <text x="200" y="172" font-family="Arial, sans-serif" font-size="15" font-weight="600" fill="#334155" text-anchor="middle">Conditional Autoregression</text>
+  <text x="200" y="192" font-family="Arial, sans-serif" font-size="13" font-weight="400" fill="#475569" text-anchor="middle">
+    Fuses past tokens with <tspan font-family="Georgia, serif" font-style="italic">C<tspan baseline-shift="sub" font-size="9">k</tspan></tspan> via FiLM to predict <tspan font-family="Georgia, serif" font-style="italic">X<tspan baseline-shift="sub" font-size="9">t</tspan></tspan>
+  </text>
+</svg>

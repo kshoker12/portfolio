@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="518.4" viewBox="0 0 720 518.4">
+  <rect x="0" y="0" width="720" height="518.4" fill="#ffffff"/>
+
+  <!-- Give the diagram extra vertical breathing room -->
+  <g transform="translate(0, 36)">
+    <!-- Nodes -->
+    <!-- Stochastic global latent -->
+    <circle cx="230" cy="220" r="56" fill="#ffffff" stroke="#111111" stroke-width="3.2"/>
+
+    <!-- Deterministic projection z_g (double-bordered) -->
+    <circle cx="390" cy="220" r="56" fill="#ffffff" stroke="#111111" stroke-width="3.2"/>
+    <circle cx="390" cy="220" r="64" fill="none" stroke="#111111" stroke-width="3.2"/>
+
+    <!-- Observed tokens (shaded) -->
+    <circle cx="540" cy="220" r="56" fill="#e5e7eb" stroke="#111111" stroke-width="3.2"/>
+    <circle cx="540" cy="60" r="56" fill="#e5e7eb" stroke="#111111" stroke-width="3.2"/>
+
+    <!-- Condition box -->
+    <rect x="464" y="316" width="160" height="78" rx="16" fill="#ffffff" stroke="#111111" stroke-width="3.2"/>
+
+    <!-- Arrows -->
+    <line x1="286" y1="220" x2="326" y2="220" stroke="#111111" stroke-width="3.2"/>
+    <polygon points="326,220 310,210 310,230" fill="#111111"/>
+
+    <line x1="454" y1="220" x2="484" y2="220" stroke="#111111" stroke-width="3.2"/>
+    <polygon points="484,220 468,210 468,230" fill="#111111"/>
+
+    <line x1="544" y1="316" x2="544" y2="276" stroke="#111111" stroke-width="3.2"/>
+    <polygon points="544,276 534,292 554,292" fill="#111111"/>
+
+    <line x1="540" y1="116" x2="540" y2="164" stroke="#111111" stroke-width="3.2"/>
+    <polygon points="540,164 530,148 550,148" fill="#111111"/>
+
+    <!-- Labels -->
+    <text x="230" y="238" text-anchor="middle" font-family="Times New Roman, Times, serif" font-size="44">Z<tspan baseline-shift="sub" font-size="28">p</tspan></text>
+    <text x="390" y="238" text-anchor="middle" font-family="Times New Roman, Times, serif" font-size="44">Z<tspan baseline-shift="sub" font-size="28">g</tspan></text>
+    <text x="540" y="78" text-anchor="middle" font-family="Times New Roman, Times, serif" font-size="44">X<tspan baseline-shift="sub" font-size="28">&lt;T</tspan></text>
+    <text x="540" y="238" text-anchor="middle" font-family="Times New Roman, Times, serif" font-size="44">X<tspan baseline-shift="sub" font-size="28">T</tspan></text>
+    <text x="544" y="368" text-anchor="middle" font-family="Times New Roman, Times, serif" font-size="38">A<tspan baseline-shift="sub" font-size="24">1:K</tspan></text>
+  </g>
+</svg>
+

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="320" viewBox="0 0 960 320">
+  <rect x="0" y="0" width="960" height="320" fill="#ffffff"/>
+  <rect x="24" y="24" width="912" height="272" rx="12" fill="#f6f8fa" stroke="#dfe2e5"/>
+
+  <text x="48" y="76" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif"
+        font-size="22" fill="#24292f" font-weight="600">
+    Plate diagram placeholder
+  </text>
+  <text x="48" y="108" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif"
+        font-size="14" fill="#57606a">
+    Replace this SVG with an exported TikZ/Overleaf plate diagram.
+  </text>
+
+  <!-- Simple plate box -->
+  <rect x="84" y="142" width="520" height="130" rx="10" fill="#ffffff" stroke="#8c959f"/>
+  <text x="104" y="172" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif"
+        font-size="14" fill="#24292f" font-weight="600">Plate</text>
+  <text x="104" y="194" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif"
+        font-size="13" fill="#57606a">N (repeated)</text>
+
+  <!-- Nodes -->
+  <circle cx="210" cy="230" r="26" fill="#ddf4ff" stroke="#0969da"/>
+  <text x="210" y="235" text-anchor="middle"
+        font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif"
+        font-size="14" fill="#0969da" font-weight="600">z</text>
+
+  <circle cx="360" cy="230" r="26" fill="#fff8c5" stroke="#9a6700"/>
+  <text x="360" y="235" text-anchor="middle"
+        font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif"
+        font-size="14" fill="#9a6700" font-weight="600">x</text>
+
+  <line x1="236" y1="230" x2="334" y2="230" stroke="#57606a" stroke-width="2"/>
+  <polygon points="334,230 326,224 326,236" fill="#57606a"/>
+
+  <!-- Outside node -->
+  <circle cx="720" cy="206" r="26" fill="#ffeef0" stroke="#cf222e"/>
+  <text x="720" y="211" text-anchor="middle"
+        font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif"
+        font-size="14" fill="#cf222e" font-weight="600">c</text>
+
+  <line x1="604" y1="206" x2="694" y2="206" stroke="#57606a" stroke-width="2"/>
+  <polygon points="694,206 686,200 686,212" fill="#57606a"/>
+
+  <text x="604" y="196" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,sans-serif"
+        font-size="12" fill="#57606a">conditioning</text>
+</svg>
+
