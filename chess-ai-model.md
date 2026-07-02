@@ -5,7 +5,7 @@
 [LinkedIn](https://www.linkedin.com/in/kshoker12/)
 
 ### Quick Access
-- **[Live Demo](https://main.d12st6uisht1xd.amplifyapp.com)** — Play against the model right now  
+- **[Live Demo](https://kshoker12.github.io/3D-Chess-App/)** — Play against the model right now  
 - **[Frontend Repo](https://github.com/kshoker12/3D-Chess-App)** — React + 3D visualization  
 - **[Backend Repo](https://github.com/kshoker12/Chess-Engine)** — FastAPI + PyTorch inference
 
