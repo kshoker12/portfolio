@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess AI Model - Documentation</title>
+    <title>World Cup 2026 Predictor - Documentation</title>
     <!-- Marked.js for markdown parsing -->
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <!-- Prism.js for syntax highlighting -->
@@ -142,11 +142,82 @@
             text-decoration: underline;
         }
 
+        .reference-entry {
+            margin-bottom: 1.25em;
+            line-height: 1.55;
+        }
+
+        .reference-entry strong a {
+            color: inherit;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .reference-entry strong a:hover {
+            text-decoration: underline;
+        }
+
         img {
             max-width: 100%;
             height: auto;
             border-radius: 4px;
             margin: 8px 0;
+        }
+
+        figure {
+            margin: 16px auto;
+            text-align: center;
+            max-width: 100%;
+            width: 100%;
+        }
+
+        figure > img {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /*
+         * Architecture SVGs: largest diagram (1292px artboard) fills the content column;
+         * others scale by intrinsic width ratio via --intrinsic-w.
+         */
+        figure.arch-diagram {
+            container-type: inline-size;
+            width: 100%;
+        }
+
+        figure.arch-diagram > img {
+            width: calc(var(--intrinsic-w, 1292) * 100cqw / 1292);
+            max-width: 100%;
+            height: auto;
+        }
+
+        figcaption {
+            margin: 10px auto 0;
+            max-width: 100%;
+            width: 100%;
+            padding: 0;
+            text-align: center;
+            color: #57606a;
+            font-size: 14px;
+            line-height: 1.65;
+        }
+
+        figcaption .MathJax,
+        figcaption mjx-container {
+            display: inline !important;
+            max-width: 100%;
+            margin: 0;
+            overflow: visible;
+            white-space: normal;
+        }
+
+        figcaption .fig-label {
+            font-weight: 600;
+            color: #24292f;
         }
 
         hr {
@@ -166,16 +237,94 @@
     </div>
 
     <script>
+        const PAGE_NAME = 'world-cup-predictor.html';
+
+        const getPageBase = () => {
+            const path = window.location.pathname;
+            if (path.endsWith(PAGE_NAME)) {
+                return path.slice(0, -PAGE_NAME.length);
+            }
+            return path.endsWith('/') ? path : path.replace(/[^/]*$/, '');
+        };
+
+        const resolveAssetPath = (src) => {
+            if (!src || /^https?:\/\//i.test(src) || src.startsWith('data:')) return src;
+            const clean = src.replace(/^\//, '');
+            return `${getPageBase()}${clean}`;
+        };
+
         // Configure marked options (let Prism handle highlighting after render)
         marked.setOptions({
             breaks: true,
             gfm: true
         });
 
+        const repairMathInner = (inner) => {
+            // GFM can italicize `_…_`, strip `\` before `%`, and leave HTML entities from markdown.
+            return inner
+                .replace(/<\/?em>/gi, '')
+                .replace(/&#95;/g, '_')
+                .replace(/&amp;/g, '&')
+                .replace(/&gt;/g, '>')
+                .replace(/&lt;/g, '<')
+                .replace(/(?<!\\)%/g, '\\%');
+        };
+
+        const repairInlineMath = (root) => {
+            root.innerHTML = root.innerHTML.replace(/\\\(([\s\S]*?)\\\)/g, (_, inner) => {
+                return `\\(${repairMathInner(inner)}\\)`;
+            });
+        };
+
+        const repairDisplayMath = (root) => {
+            root.innerHTML = root.innerHTML.replace(/\$\$([\s\S]*?)\$\$/g, (_, inner) => {
+                return `$$${repairMathInner(inner)}$$`;
+            });
+        };
+
+        const repairTableMath = (root) => {
+            root.querySelectorAll('th, td').forEach((cell) => {
+                cell.innerHTML = cell.innerHTML.replace(/\\\(([\s\S]*?)\\\)/g, (_, inner) => {
+                    return `\\(${repairMathInner(inner)}\\)`;
+                });
+            });
+        };
+
+        const numberFigures = (root) => {
+            const figures = Array.from(root.querySelectorAll('figure:not(.table-figure)'));
+            let n = 0;
+
+            figures.forEach((fig) => {
+                const caption = fig.querySelector('figcaption');
+                if (!caption) return;
+
+                n += 1;
+
+                if (!fig.id) fig.id = `fig-${n}`;
+
+                if (caption.dataset.rawHtml == null) {
+                    caption.dataset.rawHtml = caption.innerHTML;
+                }
+
+                caption.innerHTML = `<span class="fig-label">Figure ${n}.</span> ${caption.dataset.rawHtml}`;
+            });
+        };
+
+        const normalizeRawHtmlMath = (root) => {
+            // Raw HTML figcaptions pass through markdown escapes; fix \\( … \\) for MathJax.
+            root.querySelectorAll('figcaption, .reference-entry').forEach((el) => {
+                el.innerHTML = el.innerHTML
+                    .replace(/\\\\\(/g, '\\(')
+                    .replace(/\\\\\)/g, '\\)')
+                    .replace(/\\\\\{/g, '\\{')
+                    .replace(/\\\\\}/g, '\\}');
+            });
+        };
+
         // Fetch and render markdown from file
         const contentDiv = document.getElementById('content');
         
-        fetch('chess-ai-model.md')
+        fetch(resolveAssetPath('world-cup-predictor.md'))
             .then(response => response.text())
             .then(markdown => {
                 // Let marked generate code fences with `language-xxx` classes,
@@ -206,14 +355,12 @@
                     if (!h.id) h.id = slug;
                 });
 
-                // Replace images pointing to video files with HTML5 video players
+                // Normalize image paths for subpath deployments (e.g. /portfolio/)
                 const imgs = contentDiv.querySelectorAll('img');
                 imgs.forEach((img) => {
-                    let src = img.getAttribute('src') || '';
-                    if (/\.(mp4|mov|webm)$/i.test(src)) {
-                        // Normalize absolute "/..." to relative for subpath deployments
-                        if (src.startsWith('/')) src = src.replace(/^\//, '');
+                    let src = resolveAssetPath(img.getAttribute('src') || '');
 
+                    if (/\.(mp4|mov|webm)$/i.test(src)) {
                         const makeSource = (url) => {
                             const s = document.createElement('source');
                             s.src = url;
@@ -250,7 +397,11 @@
                         video.appendChild(fallback);
 
                         img.replaceWith(video);
+                        return;
                     }
+
+                    img.setAttribute('src', src);
+                    img.setAttribute('loading', 'lazy');
                 });
 
                 // Normalize in-page anchor hrefs to our slug format
@@ -278,20 +429,29 @@
                     }
                 });
 
+                // Architecture figures: native width from HTML attrs × shared viewport scale
+                contentDiv.querySelectorAll('figure.arch-diagram img[width]').forEach((img) => {
+                    const w = parseInt(img.getAttribute('width'), 10);
+                    if (Number.isFinite(w) && w > 0) {
+                        img.style.setProperty('--intrinsic-w', String(w));
+                    }
+                });
+
+                numberFigures(contentDiv);
+                normalizeRawHtmlMath(contentDiv);
+
                 // Run Prism syntax highlighting on all code blocks within the content
                 if (window.Prism && typeof window.Prism.highlightAllUnder === 'function') {
                     window.Prism.highlightAllUnder(contentDiv);
                 }
 
                 // Make inline citations like [1], [2], ... clickable and scroll to references.
-                // This turns “[n]” in the article text into a link to “ref-n” in the references list.
                 try {
-                    // Locate the "8 References" heading, then its following <ol> list.
                     const referencesHeading = Array.from(
                         contentDiv.querySelectorAll('h1,h2,h3,h4,h5,h6')
                     ).find(h => {
                         const t = (h.textContent || '').trim();
-                        return t === '8 References' || t.endsWith('8 References') || t.includes('8 References');
+                        return t === '6 References' || t.endsWith('6 References') || t.includes('6 References');
                     });
 
                     let refsOl = null;
@@ -303,7 +463,6 @@
                         }
                     }
 
-                    // Assign stable ids to each reference entry (ref-1, ref-2, ...).
                     if (refsOl) {
                         const lis = refsOl.querySelectorAll('li');
                         lis.forEach((li, i) => {
@@ -311,7 +470,6 @@
                         });
                     }
 
-                    // Replace text nodes that contain “[number]” with anchored links.
                     const citationRegex = /\[(\d+)\]/g;
                     const walker = document.createTreeWalker(contentDiv, NodeFilter.SHOW_TEXT);
                     const textNodes = [];
@@ -321,13 +479,10 @@
                         const text = node.nodeValue || '';
                         if (!citationRegex.test(text)) continue;
 
-                        // Avoid touching inside the references list itself.
                         if (refsOl && node.parentElement && node.parentElement.closest('ol') === refsOl) continue;
-
-                        // Avoid touching inside existing links.
                         if (node.parentElement && node.parentElement.closest('a')) continue;
 
-                        citationRegex.lastIndex = 0; // reset for reuse
+                        citationRegex.lastIndex = 0;
                         textNodes.push(node);
                     }
 
@@ -340,8 +495,8 @@
                         let lastIndex = 0;
 
                         for (const m of matches) {
-                            const full = m[0]; // e.g. "[9]"
-                            const n = m[1];    // e.g. "9"
+                            const full = m[0];
+                            const n = m[1];
                             const start = m.index ?? 0;
 
                             frag.append(text.slice(lastIndex, start));
@@ -361,21 +516,32 @@
                     console.error('Clickable citations setup failed:', e);
                 }
 
-                // Render math equations with MathJax
-                if (window.MathJax && window.MathJax.typesetPromise) {
-                    window.MathJax.typesetPromise([contentDiv]).catch((err) => {
-                        console.error('MathJax rendering error:', err);
-                    });
-                } else {
-                    // If MathJax hasn't loaded yet, wait for it
-                    window.addEventListener('load', () => {
-                        if (window.MathJax && window.MathJax.typesetPromise) {
-                            window.MathJax.typesetPromise([contentDiv]).catch((err) => {
-                                console.error('MathJax rendering error:', err);
-                            });
+                repairInlineMath(contentDiv);
+                repairDisplayMath(contentDiv);
+                repairTableMath(contentDiv);
+
+                // Wait until MathJax is ready (async CDN load) before typesetting.
+                const typesetWhenReady = async (root, timeoutMs = 20000) => {
+                    const start = Date.now();
+                    const tick = async () => {
+                        if (window.MathJax && window.MathJax.startup && window.MathJax.startup.promise) {
+                            try { await window.MathJax.startup.promise; } catch (_) {}
                         }
-                    });
-                }
+                        if (window.MathJax && window.MathJax.typesetPromise) {
+                            try {
+                                await window.MathJax.typesetPromise([root]);
+                                return;
+                            } catch (err) {
+                                console.error('MathJax rendering error:', err);
+                                return;
+                            }
+                        }
+                        if (Date.now() - start > timeoutMs) return;
+                        window.setTimeout(tick, 200);
+                    };
+                    tick();
+                };
+                typesetWhenReady(contentDiv);
             })
             .catch(error => {
                 contentDiv.innerHTML = `<p style="color: red;">Error loading markdown file: ${error.message}</p>`;
