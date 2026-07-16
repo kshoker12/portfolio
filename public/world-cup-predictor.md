@@ -368,16 +368,16 @@ After each round is played, pre-round picks are scored against the actual result
 
 ### 4.1 Current tournament outlook
 
-The latest forecast ([wc2026_forecast_sf.json](https://github.com/kshoker12/World-Cup-Predictor/blob/main/docs/data/wc2026_forecast_sf.json), \\(80{,}000\\) simulations from the semi-final bracket) gives title and final odds for the four remaining teams:
+The latest forecast ([wc2026_forecast_final.json](https://github.com/kshoker12/World-Cup-Predictor/blob/main/docs/data/wc2026_forecast_final.json), \\(80{,}000\\) simulations from the finals bracket) gives title odds for the two remaining teams, plus the third-place match:
 
-| Team | \\(P(\\text{reach final})\\) | \\(P(\\text{champion})\\) |
-|------|---------------------------:|------------------------:|
-| France | 55.77% | 33.50% |
-| Spain | 44.23% | 26.43% |
-| Argentina | 53.59% | 24.25% |
-| England | 46.41% | 15.82% |
+| Team | Match | \\(P(\\text{win match})\\) | \\(P(\\text{champion})\\) |
+|------|-------|-------------------------:|------------------------:|
+| Spain | Final vs Argentina | 55.92% | 55.92% |
+| Argentina | Final vs Spain | 44.08% | 44.08% |
+| France | Third place vs England | 66.49% | — |
+| England | Third place vs France | 33.51% | — |
 
-France leads on title probability (33.50%) and is the favorite in its semi-final against Spain. Argentina is the underdog favorite vs England (53.59% to reach the final) but trails Spain slightly on title odds because the other half of the bracket is tougher.
+Spain is a mild favorite in the final (55.92%). France is strongly favored for bronze (66.49%).
 
 ### 4.2 Round of 16
 
@@ -411,22 +411,25 @@ Pre-round forecast archived as [forecast_pre_qf.json](https://github.com/kshoker
 
 ### 4.4 Semi-finals
 
-Pre-round forecast from the SF bracket ([wc2026_forecast_sf.json](https://github.com/kshoker12/World-Cup-Predictor/blob/main/docs/data/wc2026_forecast_sf.json), \\(80{,}000\\) simulations). Semi-final matches and predicted winners:
+Pre-round forecast archived as [forecast_pre_sf.json](https://github.com/kshoker12/World-Cup-Predictor/blob/main/docs/data/history/forecast_pre_sf.json) (\\(80{,}000\\) simulations). Per-match predictions and outcomes:
 
 | Match | \\(P(\\text{home wins})\\) | \\(P(\\text{away wins})\\) | Predicted winner | Actual winner | Score | Correct |
 |-------|------------------------:|-------------------------:|------------------|---------------|-------|:-------:|
-| England vs Argentina | 46.41% | 53.59% | Argentina | TBA | TBA | TBA |
-| France vs Spain | 55.77% | 44.23% | France | TBA | TBA | TBA |
+| France vs Spain | 55.77% | 44.23% | France | Spain | 0–2 | ✗ |
+| England vs Argentina | 46.41% | 53.59% | Argentina | Argentina | 1–2 | ✓ |
 
-**Accuracy: TBA** (scored after the semi-finals are played).
+**Accuracy: 1/2 correct** (50.0%). Spain upset France; Argentina beat England as predicted. Cumulative live knockout scoring is now **11/14** (78.6%).
 
 ### 4.5 Final
 
+Pre-round forecast from the finals bracket ([wc2026_forecast_final.json](https://github.com/kshoker12/World-Cup-Predictor/blob/main/docs/data/wc2026_forecast_final.json), \\(80{,}000\\) simulations):
+
 | Match | \\(P(\\text{home wins})\\) | \\(P(\\text{away wins})\\) | Predicted winner | Actual winner | Score | Correct |
 |-------|------------------------:|-------------------------:|------------------|---------------|-------|:-------:|
-| TBA | TBA | TBA | TBA | TBA | TBA | TBA |
+| Spain vs Argentina | 55.92% | 44.08% | Spain | TBA | TBA | TBA |
+| France vs England (3rd place) | 66.49% | 33.51% | France | TBA | TBA | TBA |
 
-**Accuracy: TBA.** Forecast and scoring will be published when the final matchup is known.
+**Accuracy: TBA** (scored after the final and third-place match are played).
 
 ---
 
@@ -434,15 +437,15 @@ Pre-round forecast from the SF bracket ([wc2026_forecast_sf.json](https://github
 
 This project forecasts knockout World Cup matches with a calibrated ensemble of three models (LightGBM, LSTM, hierarchical Bayesian Dixon–Coles) instead of a single end-to-end predictor. LightGBM reads tabular pre-match indicators, the LSTM encodes recent match sequences, and the Bayesian term regularizes team attack and defense. Calibration merges their outputs into one \\((\lambda&#95;h, \lambda&#95;a)\\) pair per match ([Section 2](#2-architecture)).
 
-On held-out international matches, the ensemble beats every component on goal-rate and outcome metrics ([Section 2.6](#26-held-out-test-evaluation)). Dixon–Coles score sampling and \\(80{,}000\\) independent bracket simulations turn those rates into match, advancement, and title probabilities ([Section 3](#3-tournament-simulation-knockout-monte-carlo)). Live knockout scoring so far is 6/8 in the Round of 16 and 4/4 in the quarter-finals; the current semi-final outlook favors France for the title ([Section 4](#4-round-by-round-wc-2026-results)).
+On held-out international matches, the ensemble beats every component on goal-rate and outcome metrics ([Section 2.6](#26-held-out-test-evaluation)). Dixon–Coles score sampling and \\(80{,}000\\) independent bracket simulations turn those rates into match, advancement, and title probabilities ([Section 3](#3-tournament-simulation-knockout-monte-carlo)). Live knockout scoring so far is 6/8 (R16), 4/4 (QF), and 1/2 (SF) for **11/14** overall; the current final outlook mildly favors Spain over Argentina ([Section 4](#4-round-by-round-wc-2026-results)).
 
 **Limitations:**
 
 - **Penalty shootouts:** ties after extra time are broken by an Elo-based Bernoulli rule ([Section 1.2](#12-statistical-modelling-approach)), not a model trained on historical shootout data.
-- **Live evaluation:** two knockout rounds have been scored so far; the same pre-round forecast and post-round workflow should continue through the semi-finals and final.
+- **Live evaluation:** three knockout rounds have been scored so far; the same pre-round forecast and post-round workflow remains for the final (and third-place match).
 - **Uncertainty reporting:** published probabilities do not yet include Monte Carlo standard errors, so small round-to-round changes are hard to judge statistically.
 
-**Future work:** Fit a dedicated penalty model and complete multi-round scoring ([Appendix A](#appendix-a-feature-glossary)).
+**Future work:** Fit a dedicated penalty model and finish multi-round scoring after the final ([Appendix A](#appendix-a-feature-glossary)).
 
 ---
 
