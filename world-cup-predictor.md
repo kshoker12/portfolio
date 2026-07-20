@@ -5,7 +5,7 @@
 [LinkedIn](https://www.linkedin.com/in/kshoker12/)
 
 ### Quick Access
-- **[Live Forecast](https://kshoker12.github.io/World-Cup-Predictor/)** — Updated knockout forecast + round history  
+- **[Forecast Archive](https://kshoker12.github.io/World-Cup-Predictor/)** — Knockout forecasts, round history, and final results  
 - **[GitHub Repo](https://github.com/kshoker12/World-Cup-Predictor)** — training pipeline, Kaggle notebooks, simulation engine
 
 ## Abstract
@@ -18,7 +18,7 @@ This project forecasts FIFA World Cup knockout outcomes using a **calibrated ens
 
 Each model outputs expected goals \\((\lambda&#95;h, \lambda&#95;a)\\), the Poisson rate parameters for home and away scoring. From these rates the system assigns a probability to every final score (e.g., 1–0, 2–1, 0–0). A Monte Carlo simulator then plays the knockout bracket forward many times. It draws a score for each match, breaks ties with extra time and penalties, and updates team form after each result so later rounds reflect earlier outcomes.
 
-This project aims to predict the **2026 FIFA World Cup** winner and refresh that forecast **round by round**. At the start of each knockout round, newly completed results are added to the data and \\(80{,}000\\) simulations are run from the current bracket, producing updated probabilities for advancing and winning the tournament.
+This project aims to predict the **2026 FIFA World Cup** winner and refresh that forecast **round by round**. At the start of each knockout round, newly completed results are added to the data and \\(80{,}000\\) simulations are run from the current bracket, producing updated probabilities for advancing and winning the tournament. Across the full 2026 knockout stage (Round of 16 through the final), the calibrated ensemble achieved a prediction accuracy of **75.0%** (12/16 matches predicted correctly).
 
 ## 1 Introduction
 
@@ -74,7 +74,7 @@ The stronger side is only mildly favored, and shootouts remain high-variance.
 
 ### 1.3 Dataset and Features
 
-The primary training signal is international match history from the international results dataset ([martj42, 2025](#ref-1)), augmented with WC 2026 results as the tournament progresses. Club match data from Big-5 European leagues ([Understat](#ref-3), [eatpizzanot, 2025](#ref-4)) is used only to pretrain the LSTM sequence encoder ([Section 2.2](#22-sequence-model-lstm)).
+The primary training signal is international match history from the international results dataset ([martj42, 2025](#ref-1)), augmented with WC 2026 results through the completed knockout stage. Club match data from Big-5 European leagues ([Understat](#ref-3), [eatpizzanot, 2025](#ref-4)) is used only to pretrain the LSTM sequence encoder ([Section 2.2](#22-sequence-model-lstm)).
 
 At any match date, features are computed using only information available **strictly before kickoff**, by replaying match history in chronological order. This prevents data leakage, so future results cannot influence past predictions, and the same rule is enforced during simulation.
 
@@ -94,7 +94,7 @@ The remainder of this paper is organized as follows.
 
 - **Section 3 (Tournament simulation):** describes pre-round setup, one bracket simulation (feature lookup, score sampling, tie breaks, state updates), converting \\(N\\) simulation counts into probabilities, and the live round refresh workflow.
 
-- **Section 4 (Round-by-round WC 2026 results):** reports live tournament output, including pre-round forecasts and post-round scoring of those picks, and the current advancement and title probabilities from 80,000 simulations.
+- **Section 4 (Round-by-round WC 2026 results):** reports pre-round forecasts and post-round scoring for every knockout round of WC 2026, with an overall prediction accuracy of **75%** (12/16 matches).
 
 - **Section 5 (Conclusion):** summarizes what the ensemble and simulation pipeline achieve, and notes the main limitations and directions for future work.
 
@@ -360,24 +360,27 @@ Forecast script: [run_wc2026_forecast.py](https://github.com/kshoker12/World-Cup
 
 ## 4 Round-by-round WC 2026 results
 
-Live forecasts are published [here](https://kshoker12.github.io/World-Cup-Predictor/). This project began at the **start of the Round of 16**. Earlier group-stage matches were not forecast by this system.
+Forecasts and round history are published [here](https://kshoker12.github.io/World-Cup-Predictor/). This project began at the **start of the Round of 16**. Earlier group-stage matches were not forecast by this system.
 
 All win probabilities below come from the Monte Carlo simulator in [Section 3](#3-tournament-simulation-knockout-monte-carlo). For each round, \\(80{,}000\\) independent bracket simulations are run from the current knockout tree. A match win probability is \\(\hat{P}(h \text{ wins}) = C(h \text{ beats } a) / 80{,}000\\) ([Section 3.3](#33-from-simulation-counts-to-probabilities)). The **predicted winner** is the team with the higher win probability.
 
-After each round is played, pre-round picks are scored against the actual results and archived in [round_history.json](https://github.com/kshoker12/World-Cup-Predictor/blob/main/docs/data/round_history.json).
+After each round is played, those forecasts are scored against the actual results and archived in [round_history.json](https://github.com/kshoker12/World-Cup-Predictor/blob/main/docs/data/round_history.json).
 
-### 4.1 Current tournament outlook
+### 4.1 Tournament summary
 
-The latest forecast ([wc2026_forecast_final.json](https://github.com/kshoker12/World-Cup-Predictor/blob/main/docs/data/wc2026_forecast_final.json), \\(80{,}000\\) simulations from the finals bracket) gives title odds for the two remaining teams, plus the third-place match:
+**Spain** won the 2026 World Cup, beating Argentina 1–0 after extra time in the final. England took third place, defeating France 6–4 in the third-place match.
 
-| Team | Match | \\(P(\\text{win match})\\) | \\(P(\\text{champion})\\) |
-|------|-------|-------------------------:|------------------------:|
-| Spain | Final vs Argentina | 55.92% | 55.92% |
-| Argentina | Final vs Spain | 44.08% | 44.08% |
-| France | Third place vs England | 66.49% | — |
-| England | Third place vs France | 33.51% | — |
+Match prediction accuracy across all knockout rounds: **12/16 correct (75.0%)**.
 
-Spain is a mild favorite in the final (55.92%). France is strongly favored for bronze (66.49%).
+| Round | Correct | Total | Accuracy |
+|-------|--------:|------:|---------:|
+| Round of 16 | 6 | 8 | 75.0% |
+| Quarter-finals | 4 | 4 | 100% |
+| Semi-finals | 1 | 2 | 50.0% |
+| Final & third place | 1 | 2 | 50.0% |
+| **Overall** | **12** | **16** | **75.0%** |
+
+The final pre-round forecast ([wc2026_forecast_final.json](https://github.com/kshoker12/World-Cup-Predictor/blob/main/docs/data/wc2026_forecast_final.json), \\(80{,}000\\) simulations) correctly favored Spain over Argentina (55.92%) but missed the third-place match, where France (66.49%) lost to England.
 
 ### 4.2 Round of 16
 
@@ -418,18 +421,18 @@ Pre-round forecast archived as [forecast_pre_sf.json](https://github.com/kshoker
 | France vs Spain | 55.77% | 44.23% | France | Spain | 0–2 | ✗ |
 | England vs Argentina | 46.41% | 53.59% | Argentina | Argentina | 1–2 | ✓ |
 
-**Accuracy: 1/2 correct** (50.0%). Spain upset France; Argentina beat England as predicted. Cumulative live knockout scoring is now **11/14** (78.6%).
+**Accuracy: 1/2 correct** (50.0%). Spain upset France; Argentina beat England as predicted.
 
 ### 4.5 Final
 
-Pre-round forecast from the finals bracket ([wc2026_forecast_final.json](https://github.com/kshoker12/World-Cup-Predictor/blob/main/docs/data/wc2026_forecast_final.json), \\(80{,}000\\) simulations):
+Pre-round forecast archived as [forecast_pre_final.json](https://github.com/kshoker12/World-Cup-Predictor/blob/main/docs/data/history/forecast_pre_final.json) (\\(80{,}000\\) simulations). Per-match predictions and outcomes:
 
 | Match | \\(P(\\text{home wins})\\) | \\(P(\\text{away wins})\\) | Predicted winner | Actual winner | Score | Correct |
 |-------|------------------------:|-------------------------:|------------------|---------------|-------|:-------:|
-| Spain vs Argentina | 55.92% | 44.08% | Spain | TBA | TBA | TBA |
-| France vs England (3rd place) | 66.49% | 33.51% | France | TBA | TBA | TBA |
+| Spain vs Argentina | 55.92% | 44.08% | Spain | Spain | 1–0 (AET) | ✓ |
+| France vs England (3rd place) | 66.49% | 33.51% | France | England | 4–6 | ✗ |
 
-**Accuracy: TBA** (scored after the final and third-place match are played).
+**Accuracy: 1/2 correct** (50.0%). Spain won the title as predicted; England beat France for third place. Overall knockout scoring: **12/16 (75.0%)**.
 
 ---
 
@@ -437,15 +440,17 @@ Pre-round forecast from the finals bracket ([wc2026_forecast_final.json](https:/
 
 This project forecasts knockout World Cup matches with a calibrated ensemble of three models (LightGBM, LSTM, hierarchical Bayesian Dixon–Coles) instead of a single end-to-end predictor. LightGBM reads tabular pre-match indicators, the LSTM encodes recent match sequences, and the Bayesian term regularizes team attack and defense. Calibration merges their outputs into one \\((\lambda&#95;h, \lambda&#95;a)\\) pair per match ([Section 2](#2-architecture)).
 
-On held-out international matches, the ensemble beats every component on goal-rate and outcome metrics ([Section 2.6](#26-held-out-test-evaluation)). Dixon–Coles score sampling and \\(80{,}000\\) independent bracket simulations turn those rates into match, advancement, and title probabilities ([Section 3](#3-tournament-simulation-knockout-monte-carlo)). Live knockout scoring so far is 6/8 (R16), 4/4 (QF), and 1/2 (SF) for **11/14** overall; the current final outlook mildly favors Spain over Argentina ([Section 4](#4-round-by-round-wc-2026-results)).
+On held-out international matches, the ensemble beats every component on goal-rate and outcome metrics ([Section 2.6](#26-held-out-test-evaluation)). Dixon–Coles score sampling and \\(80{,}000\\) independent bracket simulations turn those rates into match, advancement, and title probabilities ([Section 3](#3-tournament-simulation-knockout-monte-carlo)).
+
+On the 2026 World Cup knockout stage, the ensemble’s match predictions were **12/16 correct (75.0%)**: 6/8 in the Round of 16, 4/4 in the quarter-finals, 1/2 in the semi-finals, and 1/2 in the final and third-place matches ([Section 4](#4-round-by-round-wc-2026-results)). Spain won the tournament; the model correctly favored Spain in the final but missed England’s third-place upset over France.
 
 **Limitations:**
 
 - **Penalty shootouts:** ties after extra time are broken by an Elo-based Bernoulli rule ([Section 1.2](#12-statistical-modelling-approach)), not a model trained on historical shootout data.
-- **Live evaluation:** three knockout rounds have been scored so far; the same pre-round forecast and post-round workflow remains for the final (and third-place match).
+- **Single-tournament evaluation:** 75% accuracy is from one knockout tournament (16 scored matches); broader validation across multiple World Cups would strengthen the live claim.
 - **Uncertainty reporting:** published probabilities do not yet include Monte Carlo standard errors, so small round-to-round changes are hard to judge statistically.
 
-**Future work:** Fit a dedicated penalty model and finish multi-round scoring after the final ([Appendix A](#appendix-a-feature-glossary)).
+**Future work:** Fit a dedicated penalty model and evaluate the same pipeline on past World Cup knockout stages ([Appendix A](#appendix-a-feature-glossary)).
 
 ---
 
