@@ -455,15 +455,22 @@ Ultimately, while quantum money promises a physically unforgeable currency with 
 ## References
 
 1. <a id="ref-ac12"></a>**[AC12]** Scott Aaronson and Paul Christiano. *Quantum money from hidden subspaces.* In Proceedings of the forty-fourth annual ACM symposium on Theory of computing, pages 41–60, 2012. [pp. 7, 8, 10, 11, 12]
+   [https://arxiv.org/abs/1203.4740](https://arxiv.org/abs/1203.4740)
 
 2. <a id="ref-bnsu14"></a>**[BNSU14]** Aharon Brodutch, Daniel Nagaj, Or Sattath, and Dominique Unruh. *An adaptive attack on Wiesner's quantum money.* arXiv preprint arXiv:1404.1507, 2014. [pp. 4, 7]
+   [https://arxiv.org/abs/1404.1507](https://arxiv.org/abs/1404.1507)
 
 3. <a id="ref-lmz23"></a>**[LMZ23]** Jiahui Liu, Hart Montgomery, and Mark Zhandry. *Another round of breaking and making quantum money: How to not build it from lattices, and more.* In Annual International Conference on the Theory and Applications of Cryptographic Techniques, pages 611–638. Springer, 2023. [p. 7]
+   [https://arxiv.org/abs/2211.11994](https://arxiv.org/abs/2211.11994)
 
 4. <a id="ref-mer07"></a>**[Mer07]** N. David Mermin. *Quantum computer science: an introduction.* Cambridge University Press, 2007. [p. 1]
+   [https://www.cambridge.org/9780521876582](https://www.cambridge.org/9780521876582)
 
 5. <a id="ref-mvw12"></a>**[MVW12]** Abel Molina, Thomas Vidick, and John Watrous. *Optimal counterfeiting attacks and generalizations for Wiesner's quantum money.* In Conference on Quantum Computation, Communication, and Cryptography, pages 45–64. Springer, 2012. [p. 4]
+   [https://arxiv.org/abs/1202.4010](https://arxiv.org/abs/1202.4010)
 
 6. <a id="ref-wie83"></a>**[Wie83]** Stephen Wiesner. *Conjugate coding.* ACM Sigact News, 15(1):78–88, 1983. [p. 2]
+   [https://doi.org/10.1145/1008908.1008920](https://doi.org/10.1145/1008908.1008920)
 
 7. <a id="ref-zha25"></a>**[Zha25]** Mark Zhandry. *Quantum money from abelian group actions.* TheoretiCS, 4, 2025. [p. 7]
+   [https://arxiv.org/abs/2307.12120](https://arxiv.org/abs/2307.12120)
