@@ -35,6 +35,42 @@
       "markdown": "music-generation-model.md"
     },
     {
+      "slug": "quantum-money",
+      "title": "Exploration of Quantum Money",
+      "year": 2025,
+      "authors": [
+        "Max Landon",
+        "Karandeep Shoker",
+        "Nick Huynh"
+      ],
+      "tags": [
+        "quantum-computing",
+        "cryptography",
+        "survey"
+      ],
+      "url": "",
+      "excerpt": "A survey of quantum money: the no-cloning theorem, Wiesner's private-key scheme and an attack on its verification, and Aaronson-Christiano hidden-subspace money as a route to public verifiability.",
+      "markdown": "quantum-money.md"
+    },
+    {
+      "slug": "stat-405-final-report",
+      "title": "Bayesian Hierarchical Item Response Theory for Mathematics Education",
+      "year": 2026,
+      "authors": [
+        "Karandeep Shoker",
+        "Joseph Lardner-Burke"
+      ],
+      "tags": [
+        "bayesian",
+        "item-response-theory",
+        "hierarchical-models",
+        "mcmc"
+      ],
+      "url": "https://github.com/kshoker12/STAT_405_Project",
+      "excerpt": "A hierarchical 3PL item response model with a skill taxonomy and response-time terms, fit in Stan with HMC and mean-field VI on NeurIPS 2020 Education Challenge data and compared by posterior predictive checks and approximate LOO.",
+      "markdown": "stat-405-final-report.md"
+    },
+    {
       "slug": "world-cup-predictor",
       "title": "World Cup 2026 Predictor",
       "year": 2026,

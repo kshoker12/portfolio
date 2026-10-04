@@ -291,19 +291,19 @@ This project was executed collaboratively. We trained the models using a Kaggle 
   <div class="plates-grid plates-grid-2x2">
     <div class="plate-panel">
       <img src="stat405_content/figures/convergence_model1_neff.png" alt="Model 1 effective sample size convergence histogram" />
-      <div class="plate-subcaption">Model 1 — \\(N_{\mathrm{eff}}\\)</div>
+      <div class="plate-subcaption">Model 1 — \(N_{\mathrm{eff}}\)</div>
     </div>
     <div class="plate-panel">
       <img src="stat405_content/figures/convergence_model1_rhat.png" alt="Model 1 R-hat convergence histogram" />
-      <div class="plate-subcaption">Model 1 — \\(\hat{R}\\)</div>
+      <div class="plate-subcaption">Model 1 — \(\hat{R}\)</div>
     </div>
     <div class="plate-panel">
       <img src="stat405_content/figures/convergence_model2_neff.png" alt="Model 2 effective sample size convergence histogram" />
-      <div class="plate-subcaption">Model 2 — \\(N_{\mathrm{eff}}\\)</div>
+      <div class="plate-subcaption">Model 2 — \(N_{\mathrm{eff}}\)</div>
     </div>
     <div class="plate-panel">
       <img src="stat405_content/figures/convergence_model2_rhat.png" alt="Model 2 R-hat convergence histogram" />
-      <div class="plate-subcaption">Model 2 — \\(\hat{R}\\)</div>
+      <div class="plate-subcaption">Model 2 — \(\hat{R}\)</div>
     </div>
   </div>
   <figcaption class="plates-caption">
