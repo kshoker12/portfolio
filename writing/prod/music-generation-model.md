@@ -8,12 +8,6 @@
 - **[MusicGen Dashboard](https://kshoker12.github.io/Music-Generation-VAE/)** — Interactive UI to generate 8-bar Piano excerpts with Controllable Attributes  
 - **[GitHub Repo](https://github.com/kshoker12/Music-Generation-VAE)** — Kaggle Training Notebooks, Model Definitions, and Inference Logic
 
-<!--
-[NARRATIVE ALIGNMENT - OVERALL TONE]
-- Tone: Precise, intuitive, no fluff. Direct to the point.
-- Strategy: "Math -> Meaning". Every statistical equation gets an intuitive, real-world translation.
-- The Flex: Highlighting the engineering required to train a complex hierarchical model on a single 16GB Kaggle T4 GPU[cite: 1, 8].
--->
 
 ## Abstract
 
@@ -31,11 +25,6 @@ Evaluation of the models spans reconstruction and latent usage (teacher-forced c
 
 ### 1.1 Motivation
 
-<!-- 
-[NARRATIVE ALIGNMENT] 
-- Frame the project: Originating from CPSC 440, evolving into an exploration of sequence modeling.
-- The "Resource Crucible": Emphasize that the 16GB Kaggle T4 limit wasn't a roadblock, but a catalyst for elegant architectural and data-pipeline design[cite: 8]. Focus on engineering efficiency over raw compute.
--->
 Generative AI models have become a game-changer in recent years. Large Language Models (LLMs) generate textual responses, Image Generation Models turn prompts into highly detailed visuals, and Coding Agents produce executable software, enabling developers to reach new levels of productivity. Originating as my CPSC 440 project at the University of British Columbia (UBC), this work explores increasingly complex generative sequence modelling architectures, using classical piano music as an empirical testbed.
 
 Music generation is a challenging sequence modelling task: the model must maintain local coherence, obey strict structural rules, and sustain an overarching theme that evolves naturally over time. Controllable generation adds further difficulty: the model must honor both a global musical theme and explicit user-defined attributes, all while remaining coherent to human listeners.
@@ -49,11 +38,6 @@ Furthermore, this research serves as a blueprint for efficient ML systems design
 
 ### 1.2 Musical Background
 
-<!--
-[NARRATIVE ALIGNMENT]
-- Intuition first: Explain bars, 4/4 time, and the REMI token format simply. 
-- Controllable Attributes: Define Polyphony Rate, Rhythmic Intensity, Velocity Dynamics, and Note Density. Frame these as the "control knobs" we want to hand to the user[cite: 8].
--->
 
 This project generates symbolic classical piano music. To understand how the models process, structure, and control the music, it's important to define a few foundational musical concepts.
 
@@ -68,31 +52,19 @@ Bars and Time Signatures: Music is modelled in bars because they are the natural
 
 ### 1.3 Dataset, Preprocessing, & Tokenization
 
-<!-- 
-[NARRATIVE ALIGNMENT]
-- Data sources: MAESTRO[cite: 7] & GiantMIDI[cite: 8]. 
-- Engineering Flex: Highlight the offline preprocessing. Mention the `uint16`/`uint8` memory-mapped arrays (memmap)[cite: 8]. Explain *why*: to bypass CPU RAM bottlenecks and keep the GPU saturated. This proves production-level system design.
--->
 
-The models are trained on a curated corpus of classical piano performances from the MAESTRO ([Hawthorne et al., 2019](#ref-1)) and GiantMIDI-Piano ([Kong et al., 2020](#ref-2)) datasets. Pieces are partitioned at the piece level into an \\(80/10/10\\) train/validation/test split. After filtering to \\(4/4\\) time signatures and applying \\(12\\)-key offline transposition on the training set, preprocessing yields \\(\\approx 1.43\\) million \\(8\\)-bar training chunks (\\(\\approx 1.46\\) billion tokens at \\(1024\\) tokens per chunk), alongside \\(20{,}135\\) validation and \\(21{,}105\\) test chunks, the latter reflecting piece-level splits without the same key augmentation.
+The models are trained on a curated corpus of classical piano performances from the MAESTRO ([Hawthorne et al., 2019](#ref-1)) and GiantMIDI-Piano ([Kong et al., 2020](#ref-2)) datasets. Pieces are partitioned at the piece level into an \\(80/10/10\\) train/validation/test split. After filtering to \\(4/4\\) time signatures and applying \\(12\\)-key offline transposition on the training set, preprocessing yields \\(\\approx 1.43\\) million \\(8\\)-bar training chunks (\\(\\approx 1.46\\) billion token positions at \\(1024\\) per chunk, including padding), alongside \\(20{,}135\\) validation and \\(21{,}105\\) test chunks, the latter reflecting piece-level splits without the same key augmentation.
 
-To maximize the quality of the training signal, the raw MIDI undergoes a strict preprocessing pipeline. Sequences are trimmed of leading silence, sliced into fixed \\(8\\)-bar windows, and filtered to remove musically sparse or inactive chunks. Additionally, a quantization process occurs where the four controllable attributes from Section \\(1.2\\) are mathematically calculated for every bar and mapped into eight discrete bins (\\(0-7\\)) based on distributions derived strictly from the training set.
+To maximize the quality of the training signal, the raw MIDI undergoes a strict preprocessing pipeline. Sequences are trimmed of leading silence, sliced into fixed \\(8\\)-bar windows, and filtered to remove musically sparse or inactive chunks. Additionally, a quantization process occurs where the four controllable attributes from [Section \\(1.2\\)](#12-musical-background) are mathematically calculated for every bar and mapped into eight discrete bins (\\(0-7\\)) based on distributions derived strictly from the training set.
 
-**Systems Optimization (Memmaps):** To bypass severe CPU RAM bottlenecks and keep the GPU fully saturated, monolithic PyTorch tensors are avoided. Instead, the final tokenized sequences and attribute labels are stored as memory-mapped binary arrays (`uint16` and `uint8` memmaps). Attributes are pre-binned offline; the DataLoader streams token slices directly from disk, with autoregressive targets derived at batch time (Section \\(2.4\\)).
+**Systems Optimization (Memmaps):** To bypass severe CPU RAM bottlenecks and keep the GPU fully saturated, monolithic PyTorch tensors are avoided. Instead, the final tokenized sequences and attribute labels are stored as memory-mapped binary arrays (`uint16` and `uint8` memmaps). Attributes are pre-binned offline; the DataLoader streams token slices directly from disk, with autoregressive targets derived at batch time ([Section \\(2.4\\)](#24-resource-constrained-optimization)).
 
 **Tokenization:** The music is tokenized into REMI (Revamped MIDI) using the `miditok` library. Utilizing a highly optimized \\(195\\)-token vocabulary, REMI translates the notes into discrete sequences capped at \\(1024\\) tokens. Crucially, the vocabulary includes an explicit `Bar` token to mark bar boundaries. During autoregressive generation, encountering this hard boundary acts as a programmatic trigger, commanding the decoder to instantly switch its conditioning to the next bar's controllable attributes, allowing the music to evolve dynamically with the progression of bars. The complete end-to-end preprocessing pipeline, memory-mapping layout (Table B2), REMI vocabulary (Table B3), and grammar masking rules (Table B4) are provided in [Appendix B](#appendix-b-data-tokenization-and-grammar-masking).
 
 ### 1.4 Statistical Modelling Approach
 
-<!--
-[NARRATIVE ALIGNMENT]
-- Introduce the "Composer, Conductor, Musician" metaphor here to ground the math.
-- Plain Decoder (The Musician alone): Generates $X_{1:T}$ autoregressively conditioned only on attributes $A_{1:K}$.
-- Simple VAE (The Composer & Musician): Introduces global latent $Z_p$ (The Composer's general vibe).
-- Hierarchical VAE (Composer, Conductor, Musician): The Conductor unrolls the global $Z_p$ into bar-level instructions $Z_{1:K}$. This bridges abstract style with local coherence.
--->
 The architectural progression explores how to enforce global structure on a localized generator.
-- **The Plain Decoder (The Musician Alone):** Without latent variables, the model relies purely on local sequence history and explicit controllable attributes (polyphony, rhythmic intensity, velocity dynamics, note density). Generation is modeled by the autoregressive conditional likelihood \\(P_\theta(X|A) = \prod_{t=1}^T P_\theta(X_t | X_{<t}, C_{k(t)})\\). For each bar \\(k\\), the four binned attributes are embedded and linearly projected to form a \\(512\\)-dimensional condition vector: \\(C_k = \text{Linear}(A_k) \in \mathbb{R}^{512}\\). Musically, this yields compositions that rigidly obey local attribute dials (e.g., playing fast and loud when instructed), but tend to wander without a cohesive, long-term melody.
+- **The Plain Decoder (The Musician Alone):** Without latent variables, the model relies purely on sequence history and explicit controllable attributes (polyphony, rhythmic intensity, velocity dynamics, note density). Generation is modeled by the autoregressive conditional likelihood \\(P_\theta(X|A) = \prod_{t=1}^T P_\theta(X_t | X_{<t}, C_{k(t)})\\). For each bar \\(k\\), the four binned attributes are embedded and linearly projected to form a \\(512\\)-dimensional condition vector: \\(C_k = \text{Linear}(A_k) \in \mathbb{R}^{512}\\). Musically, this yields compositions that rigidly obey local attribute dials (e.g., playing fast and loud when instructed), but tend to wander without a cohesive, long-term melody.
 - **The Simple VAE (The Composer & Musician):** An approximate posterior \\(Q_\phi(Z_p|X)\\) infers a single, continuous global latent \\(Z_p \sim \mathcal{N}(0, I)\\) (The Composer). This condenses the entire \\(8\\)-bar chunk's overarching musical identity into a \\(128\\)-dimensional bottleneck. \\(Z_p\\) is statically projected to \\(Z_g \in \mathbb{R}^{384}\\) and concatenated with attributes to form \\(C_k = [Z_g; A_k] \in \mathbb{R}^{512}\\). However, projecting a global latent as a static, uniform condition across all \\(8\\) bars makes it difficult to cleanly separate shifting local stylistic features from the global theme. Musically, this yields compositions that establish a consistent overarching mood or theme, but local details often blur together.
 - **The Hierarchical VAE (Composer, Conductor, Musician):** To bridge the compact global representation \\(Z_p\\) with the precise, bar-by-bar sequence variations required by the decoder, a deterministic \\(2\\)-layer GRU (The Conductor) initializes from \\(Z_p\\) and unrolls learned bar-index embeddings into bar-specific condition vectors \\(\\{Z_k\\}&#95;{k=1}^{8} \in \mathbb{R}^{384}\\). The condition becomes \\(C_k = [Z_k; A_k] \in \mathbb{R}^{512}\\). The decoder models \\(P_\theta(X|Z_p, A) = \prod_{t=1}^T P_\theta(X_t | X_{<t}, C_{k(t)})\\), ensuring long-range coherence without sacrificing local harmonic guidance. Musically, this yields highly dynamic compositions that maintain a clear, evolving long-term structure while executing precise, bar-by-bar stylistic shifts.
 
@@ -112,23 +84,17 @@ The architectural progression explores how to enforce global structure on a loca
     </div>
   </div>
   <figcaption class="plates-caption">
-    Graphical model (plate) view of the three architectures in Section 1.4. Shaded nodes are observed token variables; unshaded circles are latent or deterministic latents; double-bordered circles denote deterministic transformations. <strong>Left (Plain Decoder):</strong> the token sequence \(X = (X_1, \ldots, X_T)\) is generated autoregressively with per-bar attributes \(A_{1:K}\) mapped to \(C_k = \text{Linear}(A_k)\). <strong>Middle (Simple VAE):</strong> a global latent \(Z_p \sim \mathcal{N}(0, I)\) is inferred and projected to \(Z_g\); decoding uses \(C_k = [Z_g; A_k]\). <strong>Right (Hierarchical VAE):</strong> \(Z_p\) is deterministically unrolled by the Conductor into \(\{Z_k\}_{k=1}^{8}\); decoding uses \(C_k = [Z_k; A_k]\). In all models, \(k(t)\) indexes the bar of token \(t\).
+    Graphical model (plate) view of the three architectures in <a href="#14-statistical-modelling-approach">Section 1.4</a>. Shaded nodes are observed token variables; unshaded circles are latent or deterministic latents; double-bordered circles denote deterministic transformations. <strong>Left (Plain Decoder):</strong> the token sequence \(X = (X_1, \ldots, X_T)\) is generated autoregressively with per-bar attributes \(A_{1:K}\) mapped to \(C_k = \text{Linear}(A_k)\). <strong>Middle (Simple VAE):</strong> a global latent \(Z_p \sim \mathcal{N}(0, I)\) is inferred and projected to \(Z_g\); decoding uses \(C_k = [Z_g; A_k]\). <strong>Right (Hierarchical VAE):</strong> \(Z_p\) is deterministically unrolled by the Conductor into \(\{Z_k\}_{k=1}^{8}\); decoding uses \(C_k = [Z_k; A_k]\). In all models, \(k(t)\) indexes the bar of token \(t\).
   </figcaption>
 </figure>
 
 ### 1.5 Related Work
 
-<!--
-[NARRATIVE ALIGNMENT]
-- MusicVAE[cite: 2]: Acknowledge the hierarchical decoder to fight collapse, but note our shift to Transformers and explicit controls[cite: 1].
-- MuseMorphose[cite: 5]: Acknowledge segment-level conditioning, but explicitly contrast their "in-attention" addition with our robust FiLM (Feature-wise Linear Modulation) multiplicative conditioning[cite: 1, 4].
-- EmoMusicTV[cite: 3]: Connect to their emphasis on cross-bar coherence via hierarchical latents.
--->
 This project builds upon a rich lineage of sequence modeling techniques, specifically targeting the intersection of latent variable models and symbolic music generation.
 
 **MusicVAE (Hierarchical VAEs and Posterior Collapse):** Roberts et al. introduced MusicVAE ([Roberts et al., 2018](#ref-3)), demonstrating that using a hierarchical recurrent decoder is highly effective at mitigating posterior collapse when generating long sequences. While adopting their foundational principle of hierarchical decoding to maintain long-range structure, this work's architecture shifts the generative backbone from LSTMs to a causal Transformer to leverage superior self-attention mechanisms, and further augments the generation process with explicit user-defined attribute controls.
 
-**MuseMorphose (Segment-Level Conditioning):** This work's approach to bar-level control is closely related to MuseMorphose ([Wu & Yang, 2021](#ref-4)), a Transformer-based VAE that elegantly handles segment-level conditioning for musical attributes (like rhythmic intensity and polyphony). However, a critical architectural difference lies in the conditioning mechanism. While MuseMorphose injects its conditions into each self-attention layer of the transformer using an "in-attention" additive mechanism, this work's architecture utilizes Feature-wise Linear Modulation (FiLM) ([Perez et al., 2018](#ref-5)). FiLM is leveraged as a stronger multiplicative enforcer to strictly bind the decoder to the latent space, the mathematical mechanics of which are detailed in Section 2.1.
+**MuseMorphose (Segment-Level Conditioning):** This work's approach to bar-level control is closely related to MuseMorphose ([Wu & Yang, 2021](#ref-4)), a Transformer-based VAE that elegantly handles segment-level conditioning for musical attributes (like rhythmic intensity and polyphony). However, a critical architectural difference lies in the conditioning mechanism. While MuseMorphose injects its conditions into each self-attention layer of the transformer using an "in-attention" additive mechanism, this work's architecture utilizes Feature-wise Linear Modulation (FiLM) ([Perez et al., 2018](#ref-5)). FiLM is leveraged as a stronger multiplicative enforcer to strictly bind the decoder to the latent space, the mathematical mechanics of which are detailed in ([[Section \\(2.1\\)](#21-plain-transformer-decoder)].
 
 **EmoMusicTV (Connecting Musical Ideas Across Bars):** Finally, this work's use of a deterministic recurrent network (The Conductor) to translate global latents into sequential, bar-level instructions shares structural DNA with models like EmoMusicTV ([Ji & Yang, 2024](#ref-6)). Their work heavily emphasized the use of hierarchical latents to maintain a cohesive, evolving musical narrative across multiple bars. This validates this work's approach to bridging abstract global themes (The Composer) with localized, bar-by-bar sequence execution.
 
@@ -136,22 +102,21 @@ This project builds upon a rich lineage of sequence modeling techniques, specifi
 
 The remainder of this paper is organized as follows.
 
-- **Section 2 (Architecture)** formally instantiates the three models from Section \\(1.4\\): the Plain Decoder ([Section \\(2.1\\)](#21-plain-transformer-decoder)) with FiLM-conditioned autoregressive decoding on per-bar attributes; the Simple VAE ([Section \\(2.2\\)](#22-simple-variational-auto-encoder)) with a static global latent \\(Z_p\\); and the Hierarchical VAE ([Section \\(2.3\\)](#23-hierarchical-variational-auto-encoder)) with a GRU Conductor that unrolls \\(Z_p\\) into bar-specific latents \\(Z_k\\). Both VAE variants optimize a modified ELBO loss with cyclical \\(\beta\\)-annealing of the KL term and KL free bits to combat posterior collapse, and share a \\(3{:}1\\) latent-to-attribute split in the condition vector \\(C_k\\). Section \\(2.4\\) documents the resource-constrained Kaggle T4x2 training pipeline (memory-mapped streaming, batch-time targets, FP16 mixed precision, and gradient accumulation).
+- **[Section 2](#2-architecture) (Architecture)** formally instantiates the three models from [Section \\(1.4\\)](#14-statistical-modelling-approach): the Plain Decoder ([Section \\(2.1\\)](#21-plain-transformer-decoder)) with FiLM-conditioned autoregressive decoding on per-bar attributes; the Simple VAE ([Section \\(2.2\\)](#22-simple-variational-auto-encoder)) with a static global latent \\(Z_p\\); and the Hierarchical VAE ([Section \\(2.3\\)](#23-hierarchical-variational-auto-encoder)) with a GRU Conductor that unrolls \\(Z_p\\) into bar-specific latents \\(Z_k\\). Both VAE variants optimize a modified ELBO loss with cyclical \\(\beta\\)-annealing of the KL term and KL free bits to combat posterior collapse, and share a \\(3{:}1\\) latent-to-attribute split in the condition vector \\(C_k\\). [Section \\(2.4\\)](#24-resource-constrained-optimization) documents the resource-constrained Kaggle T4x2 training pipeline (memory-mapped streaming, batch-time targets, FP16 mixed precision, and gradient accumulation).
 
-- **Section 3 (Results)** evaluates the architectural progression across four axes: reconstruction fidelity and latent bandwidth ([Section \\(3.1\\)](#31-reconstruction-fidelity-and-latent-capacity)); attribute controllability, contrasting exact-bin accuracy with monotonic Pearson correlation ([Section \\(3.2\\)](#32-attribute-controllability)); latent-space organization via kNN purity, NMI, perturbation stability, and exploratory UMAP projections ([Section \\(3.3\\)](#33-latent-space-structure), [Appendix C](#appendix-c-global-latent-alignment-nmi)); and blind listener preference across three curated prompts, Virtuoso, Lullaby, and Crescendo ([Section \\(3.4\\)](#34-subjective-analysis), [Appendix A](#appendix-a-subjective-evaluation-videos)).
+- **[Section 3](#3-results) (Results)** evaluates the architectural progression across four axes: reconstruction fidelity and latent bandwidth ([Section \\(3.1\\)](#31-reconstruction-fidelity-and-latent-capacity)); attribute controllability, contrasting exact-bin accuracy with monotonic Pearson correlation ([Section \\(3.2\\)](#32-attribute-controllability)); latent-space organization via kNN purity, NMI, perturbation stability, and exploratory UMAP projections ([Section \\(3.3\\)](#33-latent-space-structure), [Appendix C](#appendix-c-global-latent-alignment-nmi)); and blind listener preference across three curated prompts, Virtuoso, Lullaby, and Crescendo ([Section \\(3.4\\)](#34-subjective-analysis), [Appendix A](#appendix-a-subjective-evaluation-videos)).
 
-- **Section 4 (Conclusion)** synthesizes the architectural hierarchy and key quantitative and subjective findings ([Section \\(4.1\\)](#41-summary)). Section \\(4.2\\) discusses limitations of the \\(4/4\\) time signature filtering, \\(8\\)-bar scope, the \\(3{:}1\\) FiLM conditioning trade-off, and subjective evaluation bounds, and outlines future work on longer context, balanced latent disentanglement, and LLM-guided control via the [MusicGen Dashboard](https://kshoker12.github.io/Music-Generation-VAE/). Section \\(4.3\\) closes with a personal reflection on the project's coursework origins, research-to-implementation workflow, and lessons on architectural interfaces. Implementation details appear in [Appendix A](#appendix-a-subjective-evaluation-videos)–[D](#appendix-d-training-hyperparameters-and-checkpoints).
+- **[Section 4](#4-conclusion) (Conclusion)** synthesizes the architectural hierarchy and key quantitative and subjective findings ([Section \\(4.1\\)](#41-summary)). [Section \\(4.2\\)](#42-limitations-future-work) discusses limitations of the \\(4/4\\) time signature filtering, \\(8\\)-bar scope, the \\(3{:}1\\) FiLM conditioning trade-off, and subjective evaluation bounds, and outlines future work on longer context, balanced latent disentanglement, and LLM-guided control via the [MusicGen Dashboard](https://kshoker12.github.io/Music-Generation-VAE/). [Section \\(4.3\\)](#43-self-reflection) closes with a personal reflection on the project's coursework origins, research-to-implementation workflow, and lessons on architectural interfaces. Implementation details appear in [Appendix A](#appendix-a-subjective-evaluation-videos)–[D](#appendix-d-training-hyperparameters-and-checkpoints).
 
 ## 2 Architecture
 
 ### 2.1 Plain Transformer Decoder 
-<!-- Math -> Meaning: Autoregressive generation $P_\theta(x_t | x_{<t}, A)$. Architecture breakdown. -->
 
 The baseline architecture functions as the "Session Musician." It is a non-latent autoregressive model highly capable of generating token sequences that adhere perfectly to the structural rules provided by its conditioning. Given explicit, localized instructions, such as polyphony, rhythmic intensity, velocity dynamics, and note density, the Musician executes them with precision, processing the sheet music exactly one measure at a time.
 
 **The Musician: Autoregressive Sequence Generation**
 
-The core generative engine is a causal Transformer decoder ([Vaswani et al., 2017](#ref-7)) (\\(\approx 22.8\text{M}\\) parameters, \\(N=6\\) layers, \\(n_{\mathrm{embed}}=512\\), and a maximum sequence block size of \\(T=1024\\) tokens). To condition the generation process, the model relies strictly on explicit controllable attributes. For a given bar \\(k\\), four attribute variables (introduced in Section 1.2) quantized into 8 bins (\\(0\\)–\\(7\\)) are utilized: polyphony (\\(a_k^{\mathrm{poly}}\\)), rhythmic intensity (\\(a_k^{\mathrm{rhythm}}\\)), velocity dynamics (\\(a_k^{\mathrm{vel}}\\)), and note density (\\(a_k^{\mathrm{dens}}\\)). During training, these variables are computed directly from the raw MIDI data, whereas during inference, they serve as user-defined inputs.
+The core generative engine is a causal Transformer decoder ([Vaswani et al., 2017](#ref-7)) (\\(\approx 22.9\text{M}\\) parameters including the attribute conditioner, \\(N=6\\) layers, \\(n_{\mathrm{embed}}=512\\), and a maximum sequence block size of \\(T=1024\\) tokens). To condition the generation process, the model relies strictly on explicit controllable attributes. For a given bar \\(k\\), four attribute variables (introduced in [Section 1.2](#12-musical-background)) quantized into 8 bins (\\(0\\)–\\(7\\)) are utilized: polyphony (\\(a_k^{\mathrm{poly}}\\)), rhythmic intensity (\\(a_k^{\mathrm{rhythm}}\\)), velocity dynamics (\\(a_k^{\mathrm{vel}}\\)), and note density (\\(a_k^{\mathrm{dens}}\\)). During training, these variables are computed directly from the raw MIDI data, whereas during inference, they serve as user-defined inputs.
 
 To construct the unified attribute vector \\(A_k\\), these four quantized discrete variables are passed through learned embedding tables. Since each of the 8 bins possesses its own learned parameter weights, this operation maps each discrete integer into a continuous 32-dimensional vector. These embedded representations are then concatenated to form a 128-dimensional vector:
 
@@ -200,14 +165,14 @@ where \\(\gamma_l(C_k) = \mathrm{Linear}&#95;\gamma(C_k)\\) and \\(\beta_l(C_k) 
 
 The structural necessity of this multiplicative scaling is best understood when contrasted with purely additive conditioning. Models such as MuseMorphose ([Wu & Yang, 2021](#ref-4)) utilize an "in-attention" additive mechanism, mathematically adding a projected condition directly to the hidden states (\\(\tilde{h}_l^t = h_l^t + W_C C_k\\)). While this shifts the mean of the activations, a purely additive signal is highly susceptible to being washed out by subsequent normalization layers, allowing the powerful decoder to easily bypass the conditioning.
 
-FiLM circumvents this limitation by element-wise scaling of the hidden representations. Acting as a strict gating mechanism, it can amplify or mute specific feature maps based on \\(C_k\\). This operation inextricably links the generated sequence to the conditioning vector at every depth of the network, mathematically forcing the decoder to respect the controllable attributes. 
+FiLM circumvents this limitation by element-wise scaling of the hidden representations. Acting as a strict gating mechanism, it can amplify or mute specific feature maps based on \\(C_k\\). This operation ties the generated sequence to the conditioning vector at every depth of the network, strongly pushing the decoder to respect the controllable attributes. 
 
 While this model achieves high accuracy in following the conditioning \\(C_k\\), it is fundamentally short-sighted. It adheres strictly to the explicit controllable attributes, frequently resulting in musical outputs that wander aimlessly without a cohesive, long-term melody.
 
 **Architectural Overview**
-- Components: Causal Transformer Decoder (\\(\approx 22.8\text{M}\\))
+- Components: Causal Transformer Decoder (\\(\approx 22.8\text{M}\\)), Attribute Conditioner (\\(\approx 0.07\text{M}\\))
 
-- Total Parameters: \\(\approx 22.8\text{M}\\)
+- Total Parameters: \\(\approx 22.9\text{M}\\)
 
 - Implementation: [plain_transformer.py](https://github.com/kshoker12/Music-Generation-VAE/blob/main/ml/src/musicgen/models/plain_transformer.py)
 
@@ -226,13 +191,12 @@ While this model achieves high accuracy in following the conditioning \\(C_k\\),
 </figure>
 
 ### 2.2 Simple Variational Auto-Encoder 
-<!-- Math -> Meaning: Introduce $Q_\phi(z_p|x)$. Explain the reparameterization trick briefly and intuitively. -->
 
 To give the Musician a sense of overarching direction, the architecture is expanded into a Simple Variational Autoencoder ([Kingma & Welling, 2014](#ref-8)). This introduces the concept of a "Composer": an inference network that condenses the entire musical piece into a continuous global latent space ($Z_p$). The Composer provides an abstract structural blueprint, dictating the overarching stylistic theme and mood, which is then combined with the explicit bar-level attributes to guide the Musician throughout the generation process.
 
 **The Composer: Global Latent Inference**
 
-This architecture introduces an inference network to capture this global theme, paired with the generative decoder established in Section 2.1. The inference network is a bidirectional Transformer encoder (\\(\approx 19.7\text{M}\\) parameters, \\(N=6\\) layers, \\(n_{\mathrm{embed}}=512\\)). By utilizing unmasked self-attention across the entire 8-bar input sequence \\(X\\), the encoder effectively analyzes both past and future musical context. A dedicated `[CLS]` token is prepended to the input sequence, and its final hidden state serves as the pooled representation of the entire sequence. This `[CLS]` token is linearly projected to parameterize the mean \\(\mu \in \mathbb{R}^{128}\\) and log-variance \\(\log(\sigma^2) \in \mathbb{R}^{128}\\) of a 128-dimensional approximate posterior distribution:
+This architecture introduces an inference network to capture this global theme, paired with the generative decoder established in [Section 2.1](#21-plain-transformer-decoder). The inference network is a bidirectional Transformer encoder (\\(\approx 19.7\text{M}\\) parameters, \\(N=6\\) layers, \\(n_{\mathrm{embed}}=512\\)). By utilizing unmasked self-attention across the entire 8-bar input sequence \\(X\\), the encoder effectively analyzes both past and future musical context. A dedicated `[CLS]` token is prepended to the input sequence, and its final hidden state serves as the pooled representation of the entire sequence. This `[CLS]` token is linearly projected to parameterize the mean \\(\mu \in \mathbb{R}^{128}\\) and log-variance \\(\log(\sigma^2) \in \mathbb{R}^{128}\\) of a 128-dimensional approximate posterior distribution:
 
 $$
 Q_\phi(Z_p \mid X) = \mathcal{N}(Z_p; \mu(X), \operatorname{diag}(\sigma^2(X)))
@@ -258,7 +222,7 @@ $$
 
 Coupling a VAE with a powerful causal Transformer introduces a severe optimization challenge known as posterior collapse. Since the autoregressive decoder is exceptionally strong at predicting the next token \\(X_t\\) based purely on sequence history \\(X_{1:t-1}\\), it naturally learns to ignore the global latent vector \\(Z_p\\). If this occurs, the KL term in the ELBO loss collapses to zero, rendering the latent space completely meaningless. Consequently, sampling \\(Z_p\\) during inference would have zero effect on the generated music.
 
-To mathematically force the decoder to utilize the latent space, three specific mechanisms are integrated:
+To push the decoder to utilize the latent space, three specific mechanisms are integrated:
 
 1. **Cyclical \\(\beta\\)-Annealing:** A scheduling parameter \\(\beta\\) scales the KL term during training. By cyclically ramping \\(\beta\\) from \\(0.0\\) to \\(0.1\\), the model optimizes a modified ELBO objective:
 $$
@@ -272,7 +236,7 @@ $$
 $$
 This gives the model a minimum "information budget," preventing the regularization penalty from completely erasing the expressivity of the latent dimensions.
 
-3. **Condition Vector Concatenation (\\(Z_p\\) and \\(A_k\\)):** Inspired by the conditioning structure of MuseMorphose ([Wu & Yang, 2021](#ref-4)), the final condition vector \\(C_k\\) is constructed by concatenating the latent space with the explicit controls. The global latent \\(Z_p\\) is linearly projected to 384 dimensions, while the 128-dimensional attribute vector \\(A_k\\) (from Section 2.1) is preserved:
+3. **Condition Vector Concatenation (\\(Z_p\\) and \\(A_k\\)):** Inspired by the conditioning structure of MuseMorphose ([Wu & Yang, 2021](#ref-4)), the final condition vector \\(C_k\\) is constructed by concatenating the latent space with the explicit controls. The global latent \\(Z_p\\) is linearly projected to 384 dimensions, while the 128-dimensional attribute vector \\(A_k\\) (from [Section 2.1](#21-plain-transformer-decoder)) is preserved:
 $$
 C_k = [\mathrm{Linear}_{Z}(Z_p); A_k] \in \mathbb{R}^{512}
 $$
@@ -304,24 +268,19 @@ While these mitigations are intended to prevent posterior collapse, a fundamenta
 </figure>
 
 ### 2.3 Hierarchical Variational Auto-Encoder
-<!-- 
-[NARRATIVE ALIGNMENT]
-- The Conductor: Explain the 2-layer GRU. 
-- The 3:1 Ratio Trick: Highlight that $C_k = [z_k; A_k]$ uses 384 dims for the latent and 128 for attributes[cite: 8]. Dimensional split incentivizes latent routing; do not overclaim guaranteed usage[cite: 1, 8].
--->
 To resolve the static conditioning flaw of the Simple VAE, the architecture is upgraded to a Hierarchical VAE by introducing a deterministic recurrent network: the "Conductor". The Conductor acts as a temporal translator. Instead of forcing the Musician to interpret a single, rigid global theme, the Conductor smoothly unrolls the Composer's blueprint into a dynamic sequence of unique, bar-by-bar instructions ($Z_k$).
 
 **The Conductor: Bar-Level Latent Unrolling**
 
-The architectural setup for inferring the global latent \\(Z_p\\) remains identical to the Simple VAE: utilizing the bidirectional Transformer encoder (established in Section 2.2) to infer \\(Z_p \sim \mathcal{N}(\mu, \operatorname{diag}(\sigma^2))\\) during training, and sampling \\(Z_p \sim \mathcal{N}(0, I_{128})\\) during inference.
+The architectural setup for inferring the global latent \\(Z_p\\) remains identical to the Simple VAE: utilizing the bidirectional Transformer encoder (established in [Section 2.2](#22-simple-variational-auto-encoder)) to infer \\(Z_p \sim \mathcal{N}(\mu, \operatorname{diag}(\sigma^2))\\) during training, and sampling \\(Z_p \sim \mathcal{N}(0, I_{128})\\) during inference.
 
 However, instead of statically projecting this latent across the sequence, \\(Z_p\\) is projected to initialize the hidden states of a 2-layer Gated Recurrent Unit (GRU) ([Cho et al., 2014](#ref-9)) (\\(\approx 1.9\text{M}\\) parameters) Conductor. For each bar \\(k \in \\{1, \dots, 8\\}\\), a learned bar-index embedding is fed into the GRU, producing a unique bar-level latent vector \\(Z_k\\):
 
 $$
-Z_k = \mathrm{GRU}\big(\mathrm{BarEmbed}_k;\ \mathrm{init}(Z_p)\big), \quad k \in \{1,\ldots,8\}, \quad Z_k \in \mathbb{R}^{384}
+Z_k = \mathrm{GRU}\big(\mathrm{BarEmbed}&#95;k;\ Z&#95;{k-1}\big), \quad k \in \{1,\ldots,8\}, \quad Z_k \in \mathbb{R}^{384}
 $$
 
-where \\(\mathrm{init}(Z_p)\\) maps the global latent to the GRU's initial hidden state and \\(\mathrm{BarEmbed}_k \in \mathbb{R}^{384}\\) is a learned embedding for bar index \\(k\\). This unrolling process allows \\(Z_k\\) to vary across bars while remaining anchored to the global theme encoded in \\(Z_p\\).
+where \\(Z_0 = \mathrm{init}(Z_p)\\) maps the global latent to the GRU's initial hidden state and \\(\mathrm{BarEmbed}_k \in \mathbb{R}^{384}\\) is a learned embedding for bar index \\(k\\). This unrolling process allows \\(Z_k\\) to vary across bars while remaining anchored to the global theme encoded in \\(Z_p\\).
 
 **Dynamic Condition Vectors**
 
@@ -336,7 +295,7 @@ Since \\(Z_k\\) updates iteratively, the final condition vector \\(C_k\\) is now
 By generating these dynamic, bar-specific latent instructions, the Hierarchical VAE optimizes an identical modified ELBO objective to the Simple VAE (utilizing \\(\beta\\)-annealing and KL free bits to effectively mitigate posterior collapse), while successfully bypassing the static conditioning bottleneck. Ultimately, this architecture establishes a robust generative process that synthesizes highly creative and dynamic compositions. By resolving the clash between global and local instructions, it allows for the generation of music that maintains a clear, evolving long-term structure while seamlessly executing precise, bar-by-bar stylistic shifts.
 
 **Architectural Overview**
-- Components: Bidirectional Transformer Encoder (\\(\approx 19.7\text{M}\\)), 2-Layer GRU Conductor (\\(\approx 1.9\text{M}\\)), Causal Transformer Decoder (\\(\approx 22.8\text{M}\\)), Attribute Embedder (\\(\approx 0.05\text{M}\\))
+- Components: Bidirectional Transformer Encoder (\\(\approx 19.7\text{M}\\)), 2-Layer GRU Conductor (\\(\approx 1.9\text{M}\\)), Causal Transformer Decoder (\\(\approx 22.8\text{M}\\)), Attribute Embedder (\\(\approx 0.001\text{M}\\))
 
 - Total Parameters: \\(\approx 44.3\text{M}\\)
 
@@ -358,17 +317,12 @@ By generating these dynamic, bar-specific latent instructions, the Hierarchical 
 
 ### 2.4 Resource-Constrained Optimization
 
-<!--
-[NARRATIVE ALIGNMENT]
-- Engineering Flex: Treat the 16GB Kaggle T4 limit as a design catalyst, not a roadblock.
-- Memmap streaming, collate-time Y-shift, mixed precision, and gradient accumulation.
--->
 
 While the Hierarchical VAE elegantly solved the theoretical problem of global-to-local coherence, executing it introduced a severe practical bottleneck. Training this system is not merely an architectural problem, but a systems problem as well. The same ELBO objective that regularizes the Composer (\\(Z_p\\)) also requires streaming \\(1.43\\) million long-context sequences (\\(T=1024\\)) through a \\(\approx 44.3\text{M}\\)-parameter graph on a \\(16\\)GB Kaggle T4x2 GPU. The systems-level optimizations below allow the Composer (Encoder), Conductor (GRU), and Musician (Decoder) to be optimized jointly without hardware failure.
 
 **Streaming and Target Shifting**
 
-The first physical limit was data ingestion. As introduced in Section \\(1.3\\), token sequences stream from `uint16` memory-mapped arrays directly to VRAM. To protect I/O bandwidth, autoregressive target sequences \\(Y\\) are omitted from the saved dataset entirely. Instead, \\(Y\\) is derived at batch time in the DataLoader `collate_fn` by left-shifting the input tensor \\(X\\) and appending a terminal `PAD` token, then transferred to the GPU with the batch. This avoids materializing a redundant \\(\approx 1.46\\)-billion-token target tensor on disk while preserving standard next-token supervision.
+The first physical limit was data ingestion. As introduced in [Section \\(1.3\\)](#13-dataset-preprocessing-tokenization), token sequences stream from `uint16` memory-mapped arrays directly to VRAM. To protect I/O bandwidth, autoregressive target sequences \\(Y\\) are omitted from the saved dataset entirely. Instead, \\(Y\\) is derived at batch time in the DataLoader `collate_fn` by left-shifting the input tensor \\(X\\) and appending a terminal `PAD` token, then transferred to the GPU with the batch. This avoids materializing a redundant \\(\approx 1.46\\)-billion-token target tensor on disk while preserving standard next-token supervision.
 
 **Memory and Gradient Stability**
 
@@ -387,10 +341,6 @@ See [Appendix D](#appendix-d-training-hyperparameters-and-checkpoints) (Tables D
 ## 3 Results
 
 ### 3.1 Reconstruction Fidelity and Latent Capacity
-<!-- 
-[NARRATIVE ALIGNMENT]
-- E1 Eval: Highlight that the Hierarchical VAE achieved the lowest perplexity (5.427) while maintaining healthy KL bits (~110 bits/sample)[cite: 8]. Prove that posterior collapse was defeated.
--->
 To evaluate how well the architectures capture the underlying musical distribution and utilize the variational latent bottleneck (\\(Z_p\\)), teacher-forced Cross-Entropy (CE) and Perplexity (PPL) were measured on a held-out test set of \\(\approx 1.58\\) million tokens. For the VAE variants, the total information bandwidth successfully passing from the encoder to the decoder was also tracked. Full evaluation script at [08_eval_recon_kl.ipynb](https://github.com/kshoker12/Music-Generation-VAE/blob/main/kaggle/notebooks/08_eval_recon_kl.ipynb).
 
 <figure class="table-figure">
@@ -399,7 +349,7 @@ To evaluate how well the architectures capture the underlying musical distributi
 <tr><th>Architecture</th><th>Parameters</th><th>Cross-Entropy (nats)</th><th>Perplexity (PPL)</th><th>Total KL (bits/sample)</th></tr>
 </thead>
 <tbody>
-<tr><td>Plain (Baseline)</td><td>\\(\approx 22.8\text{M}\\)</td><td>\\(1.693\\)</td><td>\\(5.51\\)</td><td>—</td></tr>
+<tr><td>Plain (Baseline)</td><td>\\(\approx 22.9\text{M}\\)</td><td>\\(1.693\\)</td><td>\\(5.51\\)</td><td>—</td></tr>
 <tr><td>Simple VAE</td><td>\\(\approx 42.5\text{M}\\)</td><td>\\(1.695\\)</td><td>\\(5.52\\)</td><td>\\(100.2\\)</td></tr>
 <tr><td>Hierarchical VAE</td><td>\\(\approx 44.3\text{M}\\)</td><td>\\(\boldsymbol{1.678}\\)</td><td>\\(\boldsymbol{5.43}\\)</td><td>\\(\boldsymbol{110.0}\\)</td></tr>
 </tbody>
@@ -410,21 +360,16 @@ To evaluate how well the architectures capture the underlying musical distributi
 **Understanding the Metrics**
 
 - **Cross-Entropy (nats) & Perplexity (PPL):** These metrics quantify the autoregressive accuracy of the decoder. A Perplexity of \\(5.43\\) means that at any given step, the model has narrowed down the correct next musical event to roughly \\(5\\) equally likely options out of the entire \\(195\\)-token vocabulary. All models performed exceptionally well, with the Hierarchical VAE taking the lead. Interestingly, simply introducing a global latent vector does not automatically improve reconstruction performance: the Simple VAE performs nearly identically to the Plain baseline (\\(5.52\\) vs. \\(5.51\\) PPL), suggesting that latent information alone is insufficient unless it can be presented to the decoder in a form that remains useful throughout the sequence.
-- **Total KL (bits/sample) & Information Distribution:** This measures the total information "bandwidth" passed from the Composer (encoder) to the Musician (decoder). The Hierarchical VAE successfully transmits approximately \\(110\\) bits of information through the bottleneck, indicating that the encoder is communicating a substantial amount of information to the decoder rather than collapsing toward the prior. Crucially, with a Free Bits hinge of \\(\lambda=1.0\\) bit per dimension applied during training, the optimizer intelligently "smeared" these \\(110\\) bits evenly across the \\(128\\)-dimensional space (averaging \\(\approx 0.86\\) bits/dim). This indicates the regularization functioned as intended: the model built a continuous map of musical structure distributed softly across the entire latent space. Neither VAE exhibits the hallmark signature of posterior collapse. Rather than driving the KL divergence toward zero and reducing the model to a standard autoregressive decoder, both architectures maintain substantial information flow through the latent bottleneck throughout training.
+- **Total KL (bits/sample) & Information Distribution:** This measures the total information "bandwidth" passed from the Composer (encoder) to the Musician (decoder). The Hierarchical VAE successfully transmits approximately \\(110\\) bits of information through the bottleneck, indicating that the encoder is communicating a substantial amount of information to the decoder rather than collapsing toward the prior. Crucially, with a Free Bits hinge of \\(\lambda=1.0\\) bit per dimension applied during training, these \\(110\\) bits are spread evenly across the \\(128\\)-dimensional space: every dimension carries between \\(0.63\\) and \\(0.98\\) bits (averaging \\(\approx 0.86\\) bits/dim), so none is left inactive. This is the signature of the free-bits design working as intended. Each dimension is allowed up to \\(1\\) bit without penalty, and the trained model uses most of that budget in all \\(128\\) dimensions, building a continuous map of musical structure distributed across the entire latent space. Neither VAE exhibits the hallmark signature of posterior collapse. Rather than driving the KL divergence toward zero and reducing the model to a standard autoregressive decoder, both architectures maintain substantial information flow through the latent bottleneck at the end of training.
 
 **Resolving the Static Conditioning Bottleneck**
 
-These reconstruction metrics validate the architectural narrative from Sections \\(2.2\\) and \\(2.3\\). The Plain baseline conditions the decoder only on per-bar attribute vectors \\(A_k\\). The Simple VAE adds a global piece-level latent \\(Z_p\\), but that vector is held fixed for all \\(8\\) bars, so the Musician still receives the same global instruction at every step. Reconstruction reflects this constraint: Simple and Plain are nearly identical (\\(5.52\\) vs. \\(5.51\\) PPL) despite the Simple model's larger capacity and an active latent bottleneck. The Hierarchical VAE changes what crosses the interface by having the Conductor unroll \\(Z_p\\) into sequence-aware, per-bar latents \\(Z_k\\), so \\(C_k = [Z_k ; A_k]\\) can evolve bar by bar. That yields the best score overall (\\(5.43\\) PPL) with only \\(\approx 1.8\text{M}\\) additional parameters over the Simple VAE, unlikely to be explained by scale alone. In short, a global latent helps reconstruction only when it is translated into localized instructions the autoregressive decoder can use throughout the sequence.
+These reconstruction metrics validate the architectural narrative from [Sections \\(2.2\\)](#22-simple-variational-auto-encoder) and [\\(2.3\\)](#23-hierarchical-variational-auto-encoder). The Plain baseline conditions the decoder only on per-bar attribute vectors \\(A_k\\). The Simple VAE adds a global piece-level latent \\(Z_p\\), but that vector is held fixed for all \\(8\\) bars, so the Musician still receives the same global instruction at every step. Reconstruction reflects this constraint: Simple and Plain are nearly identical (\\(5.52\\) vs. \\(5.51\\) PPL) despite the Simple model's larger capacity and an active latent bottleneck. The Hierarchical VAE changes what crosses the interface by having the Conductor unroll \\(Z_p\\) into sequence-aware, per-bar latents \\(Z_k\\), so \\(C_k = [Z_k ; A_k]\\) can evolve bar by bar. That yields the best score overall (\\(5.43\\) PPL) with only \\(\approx 1.8\text{M}\\) additional parameters over the Simple VAE, unlikely to be explained by scale alone. For the two VAEs, these numbers are the reconstruction term of the ELBO: the decoder is conditioned on \\(Z_p\\) inferred from the same excerpt, so the comparison directly measures how much each decoder gains from its latent. In short, in this setting, the global latent helped reconstruction only once it was translated into localized instructions the autoregressive decoder could use throughout the sequence.
 
 
 ### 3.2 Attribute Controllability
-<!-- 
-[NARRATIVE ALIGNMENT]
-- E2 Eval: Discuss the trade-off. Plain/Simple models win on exact-bin accuracy (plain 0.898, simple 0.894), but the Hierarchical model wins on monotonic control (mean Pearson r 0.943; note density ~0.94 per-attribute)[cite: 8].
-- Sample counts differ by model (plain 96/attr, simple 104, vae 120)—describe protocol, not uniform N.
--->
 
-Section \\(3.1\\) measured reconstruction quality; this evaluation asks whether the user-facing controls actually work. For each of the four attributes, the requested bin was swept from \\(0\\) to \\(7\\) while the other three attributes were held fixed at bin \\(3\\). After autoregressive generation, raw bar-level attributes were recomputed from the output tokens and scored by exact-bin accuracy, \\(\pm 1\\)-bin accuracy, and Pearson \\(r\\). Full evaluation script at [08_eval_all_combined.ipynb](https://github.com/kshoker12/Music-Generation-VAE/blob/main/kaggle/notebooks/08_eval_all_combined.ipynb).
+[Section \\(3.1\\)](#31-reconstruction-fidelity-and-latent-capacity) measured reconstruction quality; this evaluation asks whether the user-facing controls actually work. For each of the four attributes, the requested bin was swept from \\(0\\) to \\(7\\) while the other three attributes were held fixed at bin \\(3\\). For the VAEs, a single global latent \\(Z_p\\) is sampled once and held fixed for the whole sweep, so only the requested attribute changes. After autoregressive generation, raw bar-level attributes were recomputed from the output tokens and scored by exact-bin accuracy, \\(\pm 1\\)-bin accuracy, and Pearson \\(r\\), using \\(12\\) to \\(15\\) generations per requested bin. Full evaluation script at [08_eval_all_combined.ipynb](https://github.com/kshoker12/Music-Generation-VAE/blob/main/kaggle/notebooks/08_eval_all_combined.ipynb).
 
 <figure class="table-figure">
 <table>
@@ -442,23 +387,18 @@ Section \\(3.1\\) measured reconstruction quality; this evaluation asks whether 
 
 **Understanding the Metrics**
 
-- **Exact-bin accuracy & \\(\pm 1\\)-bin accuracy:** Exact-bin accuracy is the fraction of runs where the measured attribute equals the requested bin; \\(\pm 1\\)-bin accuracy allows a one-bin tolerance, which is natural under \\(8\\)-level quantization. All architectures achieve \\(\pm 1\\)-bin accuracy \\(\ge 94\\%\\), supporting the FiLM design from Section \\(2.1\\): injected condition vectors (\\(C_k\\)) keep outputs near the requested setting. The Plain and Simple models also snap to the exact bin label most of the time (\\(\approx 90\\%\\)).
-- **Pearson \\(r\\) (monotonic controllability):** Pearson \\(r\\) is the linear correlation between the requested bin index and the measured attribute level across the \\(0 \rightarrow 7\\) sweep. Values near \\(1\\) mean that turning the dial up reliably increases the measured attribute; values near \\(0\\) mean the output barely tracks the request. The Plain and Simple models show weaker monotonic scaling (\\(r \approx 0.83\\)–\\(0.85\\)), while the Hierarchical VAE achieves the highest mean \\(r\\) (\\(0.943\\)), including \\(0.94\\) on note density, the attribute where non-hierarchical models struggle most. In practice, the hierarchical model is less likely to hit the precise bin label, but far more likely to move the music in the correct direction when the dial is turned.
+- **Exact-bin accuracy & \\(\pm 1\\)-bin accuracy:** Exact-bin accuracy is the fraction of runs where the measured attribute equals the requested bin; \\(\pm 1\\)-bin accuracy allows a one-bin tolerance, which is natural under \\(8\\)-level quantization. All architectures achieve \\(\pm 1\\)-bin accuracy \\(\ge 94\\%\\), supporting the FiLM design from [Section \\(2.1\\)](#21-plain-transformer-decoder): injected condition vectors (\\(C_k\\)) keep outputs near the requested setting. The Plain and Simple models also snap to the exact bin label most of the time (\\(\approx 90\\%\\)).
+- **Pearson \\(r\\) (monotonic controllability):** Pearson \\(r\\) is the linear correlation between the requested bin index and the measured attribute level across the \\(0 \rightarrow 7\\) sweep. Values near \\(1\\) mean that turning the dial up reliably increases the measured attribute; values near \\(0\\) mean the output barely tracks the request. The Plain and Simple models show weaker monotonic scaling (\\(r \approx 0.83\\)–\\(0.85\\)), while the Hierarchical VAE achieves the highest mean \\(r\\) (\\(0.943\\)), including \\(0.94\\) on note density, the attribute where non-hierarchical models struggle most. In practice, the hierarchical model is less likely to hit the precise bin label, but more reliably moves the music in the correct direction when the dial is turned.
 
 **Coherent Control, Not Just Bin Matching**
 
-These results should be read against the problem the work set out to solve. Exact-bin accuracy asks a narrow question: did the measured attribute land on the requested integer bin? Plain and Simple models answer that well (\\(\approx 0.90\\)), but that metric does not test whether a model can steer an entire musical excerpt coherently as the dial moves. That is the harder requirement behind Sections \\(2.2\\) and \\(2.3\\): user attributes alone give the Musician (decoder) local instructions, not a durable evolving structure, and a static global latent cannot vary those instructions bar by bar.
+These results should be read against the problem the work set out to solve. Exact-bin accuracy asks a narrow question: did the measured attribute land on the requested integer bin? Plain and Simple models answer that well (\\(\approx 0.90\\)), but that metric does not test whether a model can steer an entire musical excerpt coherently as the dial moves. That is the harder requirement behind [Sections \\(2.2\\)](#22-simple-variational-auto-encoder) and [\\(2.3\\)](#23-hierarchical-variational-auto-encoder): user attributes alone give the Musician (decoder) local instructions, not a durable evolving structure, and a static global latent cannot vary those instructions bar by bar.
 
-Pearson \\(r\\) is the scorecard for that harder form of controllability. The Hierarchical VAE leads clearly (\\(r = 0.943\\) vs. \\(0.826\\) Plain and \\(0.853\\) Simple), with \\(\pm 1\\)-bin accuracy at \\(0.992\\). Lower exact-bin accuracy (\\(0.525\\)) is consistent with a stochastic global latent and bar-varying \\(C_k = [Z_k ; A_k]\\): the model trades sharp bin matching for smoother monotonic control (higher Pearson \\(r\\)). Plain and Simple architectures are better at stamping a target bin onto each individual bar: Plain relies on fixed attribute vectors alone, while Simple adds a static global \\(Z_p\\) but still cannot vary latent instructions bar by bar the way the Conductor does. Section \\(3.1\\) showed that hierarchical structure helps reconstruction; this evaluation shows it also enables the most reliable monotonic controllability.
+Pearson \\(r\\) is the scorecard for that harder form of controllability. The Hierarchical VAE leads clearly (\\(r = 0.943\\) vs. \\(0.826\\) Plain and \\(0.853\\) Simple), with \\(\pm 1\\)-bin accuracy at \\(0.992\\). The confusion matrices show what sits behind the lower exact-bin accuracy (\\(0.525\\)): the Hierarchical VAE's misses are almost all exactly one bin below the request. On rhythmic intensity, for example, every request from bin \\(3\\) to \\(7\\) lands precisely one bin lower, and velocity dynamics behaves the same way. The model moves the music up the scale in clean, ordered steps but slightly undershoots each target. This is a systematic offset rather than noise, which is why \\(\pm 1\\)-bin accuracy (\\(0.992\\)) and Pearson \\(r\\) stay so high, and a small calibration shift on the requested bins could close most of the gap. Plain and Simple architectures are better at stamping a target bin onto each individual bar: Plain relies on fixed attribute vectors alone, while Simple adds a static global \\(Z_p\\) but still cannot vary latent instructions bar by bar the way the Conductor does. [Section \\(3.1\\)](#31-reconstruction-fidelity-and-latent-capacity) showed that hierarchical structure helps reconstruction; this evaluation shows it also enables the most reliable monotonic controllability.
 
 ### 3.3 Latent Space Structure
-<!-- 
-[NARRATIVE ALIGNMENT]
-- Inspect whether μ organizes by coarse attribute profiles; hierarchical > simple on kNN purity and perturbation stability.
-- Visual: Simple = diffuse cloud; Hierarchical = clearer regional grouping. Soften full disentanglement claims.
--->
 
-Section \\(3.2\\) confirmed that the models follow explicit attribute controls. The next question is how they organize musical ideas internally, inside the \\(128\\)-dimensional global latent space (\\(Z_p\\)). For every \\(8\\)-bar chunk in a held-out test set, the most frequent bin (mode) is taken for each of the four attributes, forming a compact profile of the piece's overall character (polyphony, rhythmic intensity, velocity dynamics, note density). Pieces with similar profiles are grouped into \\(k=4\\) musical regimes using K-Means clustering, with \\(k\\) chosen by majority consensus across Silhouette, Calinski-Harabasz, and Davies-Bouldin scores. The encoded global latent mean (\\(\mu\\)) is then extracted for \\(20{,}000\\) test excerpts and projected from \\(128\\) dimensions down to \\(2\\)D using UMAP, as an attempt to visualize and understand organization within the latent space. The resulting map is compared against these attribute-based regimes, even though the models were never trained to classify them. A perturbation test adds Gaussian noise to \\(\mu\\) before decoding to measure how stable each representation is under small latent shifts. The Plain Transformer is omitted here, as it has no encoder latent. Full evaluation scripts: [022_latent_space_vae_attr.ipynb](https://github.com/kshoker12/Music-Generation-VAE/blob/main/kaggle/notebooks/022_latent_space_vae_attr.ipynb), [023_latent_space_simple_attr.ipynb](https://github.com/kshoker12/Music-Generation-VAE/blob/main/kaggle/notebooks/023_latent_space_simple_attr.ipynb).
+[Section \\(3.2\\)](#32-attribute-controllability) confirmed that the models follow explicit attribute controls. The next question is how they organize musical ideas internally, inside the \\(128\\)-dimensional global latent space (\\(Z_p\\)). For every \\(8\\)-bar chunk in a held-out test set, the most frequent bin (mode) is taken for each of the four attributes, forming a compact profile of the piece's overall character (polyphony, rhythmic intensity, velocity dynamics, note density). Pieces with similar profiles are grouped into \\(k=4\\) musical regimes using K-Means clustering, with \\(k\\) chosen by majority consensus across Silhouette, Calinski-Harabasz, and Davies-Bouldin scores. The encoded global latent mean (\\(\mu\\)) is then extracted for \\(20{,}000\\) test excerpts and projected from \\(128\\) dimensions down to \\(2\\)D using UMAP, as an attempt to visualize and understand organization within the latent space. The resulting map is compared against these attribute-based regimes, even though the models were never trained to classify them. A perturbation test adds Gaussian noise to \\(\mu\\) before decoding to measure how stable each model's output is under latent shifts. The Plain Transformer is omitted here, as it has no encoder latent. Full evaluation scripts: [022_latent_space_vae_attr.ipynb](https://github.com/kshoker12/Music-Generation-VAE/blob/main/kaggle/notebooks/022_latent_space_vae_attr.ipynb), [023_latent_space_simple_attr.ipynb](https://github.com/kshoker12/Music-Generation-VAE/blob/main/kaggle/notebooks/023_latent_space_simple_attr.ipynb).
 
 <figure class="table-figure">
 <table>
@@ -478,7 +418,7 @@ Section \\(3.2\\) confirmed that the models follow explicit attribute controls. 
 
 - **kNN Purity:** This measures local neighborhood consistency in latent space. If a piece is selected at random, what fraction of its \\(15\\) closest neighbors share the same attribute-profile cluster? A score of \\(0.25\\) is random chance for four clusters. The Hierarchical VAE reaches \\(0.38\\) in UMAP space, outperforming the Simple VAE (\\(0.36\\)) and indicating that nearby latent coordinates tend to represent pieces with a similar overall musical character.
 - **NMI (global alignment):** Normalized Mutual Information scores how well a global partition of \\(\mu\\) aligns with the attribute-profile clusters (higher is better). See [Appendix C](#appendix-c-global-latent-alignment-nmi) (Table C1) for the full protocol and scores.
-- **Neighborhood Preservation (Perturbation):** This tests structural stability. A piece's latent coordinate (\\(\mu\\)) is perturbed with Gaussian noise and decoded; the output is re-binned and checked against the original attribute-profile cluster. The Hierarchical VAE preserves its cluster label in \\(81.3\\%\\) of trials, compared to \\(74.2\\%\\) for the Simple VAE, evidence of a more continuous latent landscape where small moves produce musically coherent variation rather than abrupt stylistic jumps.
+- **Neighborhood Preservation (Perturbation):** This tests structural stability. Eight anchor pieces (two per cluster) have their latent coordinate (\\(\mu\\)) perturbed with Gaussian noise at four scales (\\(\sigma = 0.1\\) to \\(1.0\\)) and decoded with the anchor's own attribute settings, for \\(640\\) trials per model; each output is re-binned and checked against the anchor's attribute-profile cluster. The Hierarchical VAE preserves its cluster label in \\(81.3\\%\\) of trials, compared to \\(74.2\\%\\) for the Simple VAE, and its rate holds steady even at the largest noise scale. Under the same latent disturbance, the hierarchical model keeps an excerpt in its musical regime more reliably, producing variation within a style rather than abrupt stylistic jumps.
 
 <figure id="fig-latent-space-attr" class="arch-diagram">
   <img src="assets/piano-music-generative-models/figures/latent_space_attr_umap_k4.png" alt="Side-by-side UMAP projections of encoder mean μ for Simple VAE and Hierarchical VAE, colored by attribute-regime clusters (k=4)" />
@@ -487,24 +427,23 @@ Section \\(3.2\\) confirmed that the models follow explicit attribute controls. 
   </figcaption>
 </figure>
 
-**Visual Proof of the Conductor**
+**Visual Evidence of the Conductor**
 
 The UMAP projections above offer an exploratory view of latent organization; together with the table, they show a clear structural gap between the two VAE variants. In the Simple VAE, the latent map is a diffuse, heavily mixed cloud. With the same static global vector conditioning all eight bars, the encoder must compress shifting local detail and overarching style into one coordinate, and the resulting space stays close to random on global alignment scores (NMI \\(\approx 0.05\\)).
 
-In the Hierarchical VAE, the same coloring scheme is far easier to read. The projection separates into a few distinct neighborhoods with visible gaps between them, rather than one tangled cloud where every color is interleaved. Pieces with similar attribute profiles tend to sit near one another, so cluster color concentrates by region. Those neighborhoods are not pure one-color patches (several labels can still appear in the same area), but the overlap stays local; in the Simple plot, by contrast, all four colors bleed through the same mass. By delegating bar-by-bar execution to the GRU Conductor, the global latent \\(Z_p\\) is freed from tracking localized note-level detail, allowing the Composer to carve the \\(128\\)-dimensional space into broader zones of overarching musical character. Higher kNN purity, stronger perturbation preservation (\\(81.3\\%\\)), and improved global NMI (\\(0.21\\) vs. \\(0.05\\); Table C1, [Appendix C](#appendix-c-global-latent-alignment-nmi)) support that reading: the hierarchical model builds a latent space with reliable local structure, where nudging a coordinate produces a smooth variation of the current style rather than an unrelated excerpt. That closes the arc from Sections \\(2.3\\), \\(3.1\\), and \\(3.2\\): the Conductor improves reconstruction and monotonic control, and also yields a global latent topology that is measurably better organized.
+In the Hierarchical VAE, the same coloring scheme is far easier to read. The projection separates into a few distinct neighborhoods with visible gaps between them, rather than one tangled cloud where every color is interleaved. Pieces with similar attribute profiles tend to sit near one another, so cluster color concentrates by region. Those neighborhoods are not pure one-color patches (several labels can still appear in the same area), but the overlap stays local; in the Simple plot, by contrast, all four colors bleed through the same mass. By delegating bar-by-bar execution to the GRU Conductor, the global latent \\(Z_p\\) is freed from tracking localized note-level detail, allowing the Composer to carve the \\(128\\)-dimensional space into broader zones of overarching musical character. Higher kNN purity, stronger perturbation preservation (\\(81.3\\%\\)), and improved global NMI (\\(0.21\\) vs. \\(0.05\\); Table C1, [Appendix C](#appendix-c-global-latent-alignment-nmi)) support that reading: the hierarchical model builds a latent space with reliable local structure, where nudging a coordinate keeps the excerpt in the same musical regime rather than jumping to an unrelated one. That closes the arc from [Sections \\(2.3\\)](#23-hierarchical-variational-auto-encoder), [\\(3.1\\)](#31-reconstruction-fidelity-and-latent-capacity), and [\\(3.2\\)](#32-attribute-controllability): the Conductor improves reconstruction and monotonic control, and also yields a global latent topology that is measurably better organized.
 
 
 
 ### 3.4 Subjective Analysis
-<!-- Qualitative MOS evaluation; blind videos in Appendix A. -->
 
-Sections \\(3.1\\)–\\(3.3\\) quantify reconstruction, controllability, and latent organization. To assess whether the architectural upgrades from Section \\(2\\) translate to perceptible musical quality, a blind Mean Opinion Score (MOS) evaluation was conducted with non-expert listeners (\\(N=17\\)). Listeners heard three prompts and ranked anonymized Candidates A, B, and C on musicality, coherence, and how well each excerpt matched the prompt:
+[Sections \\(3.1\\)](#31-reconstruction-fidelity-and-latent-capacity)–[\\(3.3\\)](#33-latent-space-structure) quantify reconstruction, controllability, and latent organization. To assess whether the architectural upgrades from [Section \\(2\\)](#2-architecture) translate to perceptible musical quality, a blind listening test was conducted with non-expert listeners (\\(N=17\\); friends, family, and classmates). Listeners heard three prompts and ranked anonymized Candidates A, B, and C on musicality, coherence, and how well each excerpt matched the prompt:
 
 - **The Virtuoso:** Excerpts are written to sound like intense, full-bodied piano playing from start to finish (busy texture, strong rhythm, loud dynamics). Listeners judged which candidate sounds most like coherent, skilled virtuoso writing rather than noise or random note bursts.
 - **The Lullaby:** Excerpts target a soft, sparse, calming mood that stays gentle across all \\(8\\) bars. Listeners judged which candidate best feels like relaxing bedtime music without jarring loud or dense moments.
 - **The Crescendo:** Excerpts are shaped to swell over time, beginning quiet and sparse and growing toward a fuller, louder climax by the final bar. Listeners judged which candidate delivers the clearest, most natural emotional build across the piece.
 
-For each prompt, \\(10\\) eight-bar samples were generated per architecture; the two strongest clips per model were compiled into one blind video (two clips per candidate). Architectures were labeled A, B, and C with a prompt-specific letter assignment. The evaluation videos and how excerpts in each prompt were generated are in [Appendix A](#appendix-a-subjective-evaluation-videos).
+For each prompt, \\(10\\) eight-bar samples were generated per architecture with identical attribute settings; after listening to all ten, I selected the two strongest clips per model to represent it, and these were compiled into one blind video (two clips per candidate). Architectures were labeled A, B, and C with a prompt-specific letter assignment. The evaluation videos and how excerpts in each prompt were generated are in [Appendix A](#appendix-a-subjective-evaluation-videos).
 
 <figure class="table-figure">
 <table>
@@ -526,16 +465,15 @@ Across all three prompts, the excerpts reflected how each architecture condition
 
 - **Simple VAE:** Each excerpt carries one global theme from \\(Z_p\\) that stays the same across all \\(8\\) bars. Listeners ranked it first on the Lullaby prompt (\\(15/17\\) votes), where the music should remain calm throughout. It also ranked first on the Crescendo prompt (\\(9/17\\) votes), since across bars, only the attribute settings change (growing louder and denser), while the underlying theme stays fixed. With only the controllable attributes \\(A_k\\) varying in condition vector \\(C_k\\) and driving the build while \\(Z_p\\) remains fixed, excerpts may have resulted in a more controlled crescendo.
 
-- **Hierarchical VAE:** Ranked first on the Virtuoso prompt (\\(11/17\\) votes), listeners noted greater depth and smoother, more resolved endings. The Conductor unrolls \\(Z_p\\) into a unique bar-specific latent \\(Z_k\\), so the condition vector \\(C_k = [Z_k ; A_k]\\) combines that evolving latent instruction with the attribute dials for each bar. Unlike the Simple VAE, \\(C_k\\) is fully dynamic with both parts of \\(C_k\\) permitted to shift across bars while still tracing back to one global theme, which listeners preferred for the Virtuoso prompt, resulting in highly creative dense music which remains coherent.
+- **Hierarchical VAE:** Ranked first on the Virtuoso prompt (\\(11/17\\) votes); listeners' informal feedback after the test pointed to greater depth and smoother, more resolved endings. The Conductor unrolls \\(Z_p\\) into a unique bar-specific latent \\(Z_k\\), so the condition vector \\(C_k = [Z_k ; A_k]\\) combines that evolving latent instruction with the attribute dials for each bar. Unlike the Simple VAE, \\(C_k\\) is fully dynamic with both parts of \\(C_k\\) permitted to shift across bars while still tracing back to one global theme, which listeners preferred for the Virtuoso prompt, resulting in highly creative dense music which remains coherent.
 
 ## 4 Conclusion
 
 ### 4.1 Summary
-<!-- Wrap up: How combining rigorous statistical methods (VAE, FiLM) with hierarchical temporal unrolling solved long-range piano generation. -->
 
 This project investigates a central tension in generative sequence modeling: powerful autoregressive decoders inherently prioritize local next-token statistics, which often overpowers variational bottlenecks and collapses global structural coherence. Using classical piano as a controlled empirical testbed, three progressively richer architectures were evaluated: a Plain Transformer Decoder ([Section \\(2.1\\)](#21-plain-transformer-decoder)), a Simple VAE ([Section \\(2.2\\)](#22-simple-variational-auto-encoder)), and a Hierarchical VAE ([Section \\(2.3\\)](#23-hierarchical-variational-auto-encoder)). Each architecture is strictly conditioned on four user-controllable, bar-level attributes ([Section \\(1.2\\)](#12-musical-background)) injected via Feature-wise Linear Modulation (FiLM) ([Section \\(2.1\\)](#21-plain-transformer-decoder)).
 
-The quantitative evaluations detailed in [Section \\(3\\)](#3-results) establish a clear architectural hierarchy. The Plain Decoder strictly obeys explicit local controls, achieving the highest exact-bin accuracy (\\(0.898\\)) but wandering aimlessly without a long-range structural identity. The Simple VAE attempts to resolve this by introducing a continuous global latent \\(Z_p \sim \mathcal{N}(0, I_{128})\\). However, projecting this global latent statically across the sequence creates a condition vector \\(C_k = [\mathrm{Linear}_{Z}(Z_p); A_k]\\) where the latent contribution remains identical for all eight bars. This static conditioning fails to meaningfully improve reconstruction (\\(5.52\\) PPL, matching the baseline), as the high-capacity causal decoder learns to bypass the unchanging global signal in favor of local token history.
+The quantitative evaluations detailed in [Section \\(3\\)](#3-results) establish a clear architectural hierarchy. The Plain Decoder strictly obeys explicit local controls, achieving the highest exact-bin accuracy (\\(0.898\\)) but wandering aimlessly without a long-range structural identity. The Simple VAE attempts to resolve this by introducing a continuous global latent \\(Z_p \sim \mathcal{N}(0, I_{128})\\). However, projecting this global latent statically across the sequence creates a condition vector \\(C_k = [\mathrm{Linear}_{Z}(Z_p); A_k]\\) where the latent contribution remains identical for all eight bars. This static conditioning fails to meaningfully improve reconstruction (\\(5.52\\) PPL, matching the baseline), suggesting that the high-capacity causal decoder learns to bypass the unchanging global signal in favor of local token history.
 
 The Hierarchical VAE elegantly eliminates this static conditioning bottleneck by utilizing a recurrent GRU Conductor to unroll \\(Z_p\\) into dynamic, bar-specific latents \\(Z_k\\). Autoregressive decoding conditioned on this continuously evolving vector \\(C_k = [Z_k ; A_k]\\) achieves superior reconstruction (\\(5.43\\) PPL), the strongest monotonic attribute control (Pearson \\(r = 0.943\\)), and a highly structured latent topology (\\(4\times\\) higher NMI) ([Section \\(3.1\\)](#31-reconstruction-fidelity-and-latent-capacity), [Section \\(3.2\\)](#32-attribute-controllability), and [Section \\(3.3\\)](#33-latent-space-structure)). Furthermore, integrating cyclical \\(\beta\\)-annealing and KL free bits successfully mitigates posterior collapse, transmitting \\(\approx 110\\) bits per sample of rich structural information through the variational bottleneck.
 
@@ -553,7 +491,7 @@ Filtering the training corpus to \\(4/4\\) time signatures and fixed \\(8\\)-bar
 
 Both VAE variants allocate a \\(3{:}1\\) dimensional split within \\(C_k\\) ([Section \\(2.2\\)](#22-simple-variational-auto-encoder) and [Section \\(2.3\\)](#23-hierarchical-variational-auto-encoder)): \\(384\\) dimensions to the projected latent and \\(128\\) to the attribute vector. That asymmetry discourages posterior collapse by reserving bandwidth for \\(Z_p\\), but it also biases the decoder toward global theme over exact-bin adherence ([Section \\(3.2\\)](#32-attribute-controllability)). A sampled \\(Z_p \sim \mathcal{N}(0, I_{128})\\) can therefore work against the requested attribute settings, and users may need multiple resamples before global style and local controls align. Future designs will explore a balanced \\(2{:}2\\) FiLM ratio paired with adversarial latent disentanglement, using gradient-reversal objectives to keep the global latent orthogonal to explicit control signals.
 
-Subjective evaluation ([Section \\(3.4\\)](#34-subjective-analysis)) relied on curated clip subsets rather than exhaustive open-ended sampling, which bounds how strongly consistency claims generalize beyond the selected excerpts. To make the pipeline more accessible in practice, a planned extension couples an LLM routing layer to the [MusicGen Dashboard](https://kshoker12.github.io/Music-Generation-VAE/): natural-language requests would be parsed into bar-wise attribute schedules before decoding, so users could steer generation through conversation rather than raw \\(0\\)–\\(7\\) bins. That interface would close the gap between the conditioning formalism developed here and intuitive creative intent.
+Each architecture was trained once, and the controllability sweep uses one sampled latent per VAE; repeating both across training seeds and latent draws would tighten the quantitative comparisons. Subjective evaluation ([Section \\(3.4\\)](#34-subjective-analysis)) relied on curated clip subsets rather than exhaustive open-ended sampling, which bounds how strongly consistency claims generalize beyond the selected excerpts. To make the pipeline more accessible in practice, a planned extension couples an LLM routing layer to the [MusicGen Dashboard](https://kshoker12.github.io/Music-Generation-VAE/): natural-language requests would be parsed into bar-wise attribute schedules before decoding, so users could steer generation through conversation rather than raw \\(0\\)–\\(7\\) bins. That interface would close the gap between the conditioning formalism developed here and intuitive creative intent.
 
 
 ### 4.3 Self-Reflection
@@ -616,11 +554,11 @@ Proposes the gated recurrent hidden unit (GRU) with reset and update gates — s
 
 ## Appendix
 
-The appendices collect implementation details referenced throughout the main text: subjective evaluation materials for Section \\(3.4\\) ([Appendix A](#appendix-a-subjective-evaluation-videos)); preprocessing and tokenization with Tables B1–B4 ([Appendix B](#appendix-b-data-tokenization-and-grammar-masking)); the NMI protocol for Section \\(3.3\\) with Table C1 ([Appendix C](#appendix-c-global-latent-alignment-nmi)); and training hyperparameters with Tables D1–D2 ([Appendix D](#appendix-d-training-hyperparameters-and-checkpoints)).
+The appendices collect implementation details referenced throughout the main text: subjective evaluation materials for [Section \\(3.4\\)](#34-subjective-analysis) ([Appendix A](#appendix-a-subjective-evaluation-videos)); preprocessing and tokenization with Tables B1–B4 ([Appendix B](#appendix-b-data-tokenization-and-grammar-masking)); the NMI protocol for [Section \\(3.3\\)](#33-latent-space-structure) with Table C1 ([Appendix C](#appendix-c-global-latent-alignment-nmi)); and training hyperparameters with Tables D1–D2 ([Appendix D](#appendix-d-training-hyperparameters-and-checkpoints)).
 
 ### Appendix A: Subjective Evaluation Videos
 
-Section \\(3.4\\) used blind MOS videos. Each video presents Candidates A, B, and C with two \\(8\\)-bar clips per candidate, separated by brief silence. Listeners did not know which architecture each letter represented; the mapping below is fixed per prompt.
+[Section \\(3.4\\)](#34-subjective-analysis) used blind listening-test videos. Each video presents Candidates A, B, and C with two \\(8\\)-bar clips per candidate, separated by brief silence. Listeners did not know which architecture each letter represented; the mapping below is fixed per prompt.
 
 **Generating the clips.** Ninety eight-bar piano excerpts were generated in total (\\(3\\) architectures, \\(3\\) prompts, and \\(10\\) samples per combination) using [ml/scripts/generate_mos_samples.py](https://github.com/kshoker12/Music-Generation-VAE/blob/main/ml/scripts/generate_mos_samples.py). For a given prompt and sample slot, all three models received the same attribute settings so the comparison is fair. VAE models additionally drew one global latent \\(Z_p\\) per excerpt and held it fixed across all bars; the Plain baseline used attributes only. Decoding used standard autoregressive sampling with grammar masking (temperature \\(1.0\\), nucleus \\(p=0.9\\)). 
 
@@ -630,7 +568,7 @@ Section \\(3.4\\) used blind MOS videos. Each video presents Candidates A, B, an
 - **The Lullaby:** All four dials kept very low on every bar (bins \\(1\\)–\\(2\\)).
 - **The Crescendo:** Polyphony and rhythm held at a moderate fixed level (bin \\(4\\)); velocity and density ramp from bin \\(1\\) to bin \\(7\\) linearly across bars \\(1\\)–\\(8\\), producing a deliberate build. The ramp is identical for every sample in this prompt; differences come from model and random seed.
 
-**Building the videos.** From the ten samples per model per prompt, the two strongest clips were selected for the blind videos. Each candidate therefore contributes two excerpts. Playback order: A (clip 1, clip 2) → silence → B (clip 1, clip 2) → silence → C (clip 1, clip 2).
+**Building the videos.** From the ten samples per model per prompt, the two strongest clips were selected for the blind videos after listening to all ten. Each candidate therefore contributes two excerpts. Playback order: A (clip 1, clip 2) → silence → B (clip 1, clip 2) → silence → C (clip 1, clip 2).
 
 **The Virtuoso**
 
@@ -763,7 +701,7 @@ This keeps the training signal focused on musically active excerpts rather than 
 
 ### Appendix C: Global Latent Alignment (NMI)
 
-Section \\(3.3\\) reports Normalized Mutual Information (NMI) as a **global** complement to kNN purity (local) and perturbation preservation (decode stability).
+[Section \\(3.3\\)](#33-latent-space-structure) reports Normalized Mutual Information (NMI) as a **global** complement to kNN purity (local) and perturbation preservation (decode stability).
 
 **Protocol.** Attribute-profile clusters are defined by K-means (\\(k=4\\)) on the 4-D mode vector for each test excerpt (same labels used to color the UMAP figures). Independently, K-means with the same \\(k=4\\) is fit on the full \\(128\\)-D encoder mean \\(\mu\\). NMI measures how much knowing a point's attribute-profile cluster reduces uncertainty about its \\(\mu\\)-cluster assignment. A score near \\(0\\) means the two partitionings are unrelated; \\(1\\) would mean perfect alignment. Results are summarized in Table C1.
 
@@ -780,7 +718,7 @@ Section \\(3.3\\) reports Normalized Mutual Information (NMI) as a **global** co
 <figcaption><span class="fig-label">Table C1.</span> Global latent alignment (NMI) on the held-out test set.</figcaption>
 </figure>
 
-The Simple VAE score is near chance: cutting \\(\mu\\) into four groups does not recover the attribute-based regimes. The Hierarchical VAE score is modest in absolute terms but roughly \\(4\\times\\) higher, consistent with the spatially separated UMAP neighborhoods in Section \\(3.3\\), where attribute-profile colors concentrate regionally even though no region maps cleanly to one color alone. Source notebooks: [022_latent_space_vae_attr.ipynb](https://github.com/kshoker12/Music-Generation-VAE/blob/main/kaggle/notebooks/022_latent_space_vae_attr.ipynb), [023_latent_space_simple_attr.ipynb](https://github.com/kshoker12/Music-Generation-VAE/blob/main/kaggle/notebooks/023_latent_space_simple_attr.ipynb).
+The Simple VAE score is near chance: cutting \\(\mu\\) into four groups does not recover the attribute-based regimes. The Hierarchical VAE score is modest in absolute terms but roughly \\(4\\times\\) higher, consistent with the spatially separated UMAP neighborhoods in [Section \\(3.3\\)](#33-latent-space-structure), where attribute-profile colors concentrate regionally even though no region maps cleanly to one color alone. Source notebooks: [022_latent_space_vae_attr.ipynb](https://github.com/kshoker12/Music-Generation-VAE/blob/main/kaggle/notebooks/022_latent_space_vae_attr.ipynb), [023_latent_space_simple_attr.ipynb](https://github.com/kshoker12/Music-Generation-VAE/blob/main/kaggle/notebooks/023_latent_space_simple_attr.ipynb).
 
 ### Appendix D: Training Hyperparameters and Checkpoints
 

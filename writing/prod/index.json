@@ -1,0 +1,55 @@
+{
+  "projects": [
+    {
+      "slug": "chess-ai-model",
+      "title": "Transformer-Based Chess AI Model",
+      "year": 2026,
+      "authors": [
+        "Karandeep Shoker"
+      ],
+      "tags": [
+        "transformers",
+        "reinforcement-learning",
+        "search",
+        "chess"
+      ],
+      "url": "https://github.com/kshoker12/Chess-Engine",
+      "excerpt": "Policy and value transformers plus alpha-beta and MCTS, trained on Kaggle T4 GPUs, with hard mode estimated at 2200-2400 Elo against Chess.com bots.",
+      "markdown": "chess-ai-model.md"
+    },
+    {
+      "slug": "music-generation-model",
+      "title": "Piano Music Generative Models",
+      "year": 2026,
+      "authors": [
+        "Karandeep Shoker"
+      ],
+      "tags": [
+        "vae",
+        "transformers",
+        "generative-models",
+        "music"
+      ],
+      "url": "https://github.com/kshoker12/Music-Generation-VAE",
+      "excerpt": "Controllable symbolic piano generation with a plain transformer, a simple VAE, and a hierarchical VAE, compared on reconstruction, attribute control, and listener preference.",
+      "markdown": "music-generation-model.md"
+    },
+    {
+      "slug": "world-cup-predictor",
+      "title": "World Cup 2026 Predictor",
+      "year": 2026,
+      "authors": [
+        "Karandeep Shoker"
+      ],
+      "tags": [
+        "ensemble",
+        "bayesian",
+        "sports-analytics",
+        "forecasting"
+      ],
+      "url": "https://github.com/kshoker12/World-Cup-Predictor",
+      "excerpt": "A calibrated ensemble of LightGBM, an LSTM, and a Dixon-Coles Bayesian model that refreshes World Cup knockout forecasts each round, evaluated on 8,192 held-out matches and the 2026 knockout stage.",
+      "markdown": "world-cup-predictor.md"
+    }
+  ]
+}

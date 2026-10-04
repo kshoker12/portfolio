@@ -18,7 +18,7 @@ This project forecasts FIFA World Cup knockout outcomes using a **calibrated ens
 
 Each model outputs expected goals \\((\lambda&#95;h, \lambda&#95;a)\\), the Poisson rate parameters for home and away scoring. From these rates the system assigns a probability to every final score (e.g., 1–0, 2–1, 0–0). A Monte Carlo simulator then plays the knockout bracket forward many times. It draws a score for each match, breaks ties with extra time and penalties, and updates team form after each result so later rounds reflect earlier outcomes.
 
-This project aims to predict the **2026 FIFA World Cup** winner and refresh that forecast **round by round**. At the start of each knockout round, newly completed results are added to the data and \\(80{,}000\\) simulations are run from the current bracket, producing updated probabilities for advancing and winning the tournament. Across the full 2026 knockout stage (Round of 16 through the final), the calibrated ensemble achieved a prediction accuracy of **75.0%** (12/16 matches predicted correctly).
+This project aims to predict the **2026 FIFA World Cup** winner and refresh that forecast **round by round**. At the start of each knockout round, newly completed results are added to the data and \\(80{,}000\\) simulations are run from the current bracket, producing updated probabilities for advancing and winning the tournament. The system was also evaluated on **8,192 held-out international matches** (2018 to 2026), where the calibrated ensemble beat every individual model and a naive baseline on goal-rate and outcome metrics (e.g. Poisson deviance \\(2.352\\) vs. \\(2.393\\) for the best single model, LightGBM). Across the full 2026 knockout stage (Round of 16 through the final), the calibrated ensemble achieved a prediction accuracy of **75.0%** (12/16 matches predicted correctly).
 
 ## 1 Introduction
 
@@ -60,23 +60,23 @@ $$
 P&#95;{\text{DC}}(i,j) \propto \tau(i,j;\rho) \cdot \text{Pois}(i;\lambda&#95;h) \cdot \text{Pois}(j;\lambda&#95;a)
 $$
 
-\\(\rho\\) is a single parameter that controls how much 0–0, 1–0, 0–1, and 1–1 are adjusted away from independent Poisson; every other scoreline is unchanged. This Dixon–Coles correction aligns \\(P&#95;{\text{DC}}\\) with real international football, so regulation draws are sampled at realistic rates and the knockout simulator can resolve ties through extra time and shootouts before picking a winner.
+\\(\rho\\) is a single parameter that controls how much 0–0, 1–0, 0–1, and 1–1 are adjusted away from independent Poisson; every other scoreline is unchanged. This Dixon–Coles correction brings \\(P&#95;{\text{DC}}\\) closer to real international football (the fitted \\(\hat{\rho} = -0.05\\) slightly raises 0–0 and 1–1), so regulation draws are sampled at realistic rates and the knockout simulator can resolve ties through extra time and shootouts before picking a winner.
 
 **Knockout tie resolution:** A knockout match cannot end in a draw. The simulator follows the same order of resolution as a real knockout match:
 
 1. **Regulation (always):** sample a scoreline \\((G&#95;h, G&#95;a)\\) from \\(P&#95;{\text{DC}}\\).
 2. **Extra time (only if regulation ends tied):** sample an *additional* 30-minute score from \\(P&#95;{\text{DC}}\\) again, but with goal rates \\(\\lambda&#95;h/3\\) and \\(\\lambda&#95;a/3\\) (30 minutes vs. 90), and add it to the regulation total.
-3. **Penalties (only if still tied after extra time):** declare a winner by a Bernoulli draw. This version does not fit a separate penalty model. Elo difference instead provides a simple strength-based tiebreak. The better-rated team is slightly more likely to win, but the probability stays near 50–50 because real shootouts are highly random. Let \\(\\Delta\\) be home Elo minus away Elo. The home-team shootout win probability is
+3. **Penalties (only if still tied after extra time):** declare a winner by a Bernoulli draw. This version does not fit a separate penalty model. Elo difference instead provides a simple strength-based tiebreak. The better-rated team is favored in proportion to its Elo edge (for example, \\(64\\%\\) for a 100-point gap), so evenly matched teams face a near coin flip while a clear strength gap still counts. Let \\(\\Delta\\) be home Elo minus away Elo. The home-team shootout win probability is
 $$
 P(\text{home wins shootout}) = \frac{1}{1 + 10^{-\Delta / 400}}
 $$
-The stronger side is only mildly favored, and shootouts remain high-variance.
+Shootouts stay high-variance for close matchups.
 
 ### 1.3 Dataset and Features
 
 The primary training signal is international match history from the international results dataset ([martj42, 2025](#ref-1)), augmented with WC 2026 results through the completed knockout stage. Club match data from Big-5 European leagues ([Understat](#ref-3), [eatpizzanot, 2025](#ref-4)) is used only to pretrain the LSTM sequence encoder ([Section 2.2](#22-sequence-model-lstm)).
 
-At any match date, features are computed using only information available **strictly before kickoff**, by replaying match history in chronological order. This prevents data leakage, so future results cannot influence past predictions, and the same rule is enforced during simulation.
+Matches are split chronologically: everything before 2010 is used for training (33,588 matches), 2010 to 2017 for validation and calibration (7,709), and 2018 onward for the held-out test (8,192 matches, through July 2026). At any match date, features are computed using only information available **strictly before kickoff**, by replaying match history in chronological order. This prevents data leakage, so future results cannot influence past predictions, and the same rule is enforced during simulation.
 
 Core tabular features are summarized below. Precise definitions appear in [Appendix A](#appendix-a-feature-glossary):
 
@@ -90,15 +90,15 @@ Core tabular features are summarized below. Precise definitions appear in [Appen
 
 The remainder of this paper is organized as follows.
 
-- **Section 2 (Architecture):** discusses the three match models (tabular LightGBM, LSTM sequence model, and hierarchical Bayesian Dixon–Coles), explains how calibration combines them into one ensemble that outputs \\((\lambda&#95;h, \lambda&#95;a)\\) per match, summarizes the end-to-end inference graph, and reports held-out test metrics comparing each component to the ensemble.
+- **[Section 2](#2-architecture) (Architecture):** discusses the three match models (tabular LightGBM, LSTM sequence model, and hierarchical Bayesian Dixon–Coles), explains how calibration combines them into one ensemble that outputs \\((\lambda&#95;h, \lambda&#95;a)\\) per match, summarizes the end-to-end inference graph, and reports held-out test metrics comparing each component to the ensemble.
 
-- **Section 3 (Tournament simulation):** describes pre-round setup, one bracket simulation (feature lookup, score sampling, tie breaks, state updates), converting \\(N\\) simulation counts into probabilities, and the live round refresh workflow.
+- **[Section 3](#3-tournament-simulation-knockout-monte-carlo) (Tournament simulation):** describes pre-round setup, one bracket simulation (feature lookup, score sampling, tie breaks, state updates), converting \\(N\\) simulation counts into probabilities, and the live round refresh workflow.
 
-- **Section 4 (Round-by-round WC 2026 results):** reports pre-round forecasts and post-round scoring for every knockout round of WC 2026, with an overall prediction accuracy of **75%** (12/16 matches).
+- **[Section 4](#4-round-by-round-wc-2026-results) (Round-by-round WC 2026 results):** reports pre-round forecasts and post-round scoring for every knockout round of WC 2026, with an overall prediction accuracy of **75%** (12/16 matches).
 
-- **Section 5 (Conclusion):** summarizes what the ensemble and simulation pipeline achieve, and notes the main limitations and directions for future work.
+- **[Section 5](#5-conclusion) (Conclusion):** summarizes what the ensemble and simulation pipeline achieve, and notes the main limitations and directions for future work.
 
-- **Section 6 (References):** lists data sources and methodological papers. Feature definitions are collected in [Appendix A](#appendix-a-feature-glossary). AI use is disclosed in [Appendix B](#appendix-b-ai-disclosure).
+- **[Section 6](#6-references) (References):** lists data sources and methodological papers. Feature definitions are collected in [Appendix A](#appendix-a-feature-glossary). AI use is disclosed in [Appendix B](#appendix-b-ai-disclosure).
 
 ---
 
@@ -110,7 +110,7 @@ $$
 (\lambda&#95;h, \lambda&#95;a) = f&#95;m(x, s&#95;h, s&#95;a).
 $$
 
-The three models are trained independently on international match history (chronological train/validation/test splits, with no future leakage). A calibration step then rescales their outputs and combines them into one ensemble rate per match. The hyperparameters in this section are from the production Kaggle training run ([run_kaggle_pipeline.py](https://github.com/kshoker12/World-Cup-Predictor/blob/main/scripts/run_kaggle_pipeline.py) with `--profile kaggle`, see [kaggle.yaml](https://github.com/kshoker12/World-Cup-Predictor/blob/main/config/profiles/kaggle.yaml)), which produced the deployed WC 2026 forecasts. Training scripts live in [`scripts/`](https://github.com/kshoker12/World-Cup-Predictor/tree/main/scripts) and model code in [`src/worldcup_predictor/models/`](https://github.com/kshoker12/World-Cup-Predictor/tree/main/src/worldcup_predictor/models).
+The three models are trained separately on international match history (chronological train/validation/test splits, with no future leakage). A calibration step then rescales their outputs and combines them into one ensemble rate per match. The hyperparameters in this section are from the production Kaggle training run ([run_kaggle_pipeline.py](https://github.com/kshoker12/World-Cup-Predictor/blob/main/scripts/run_kaggle_pipeline.py) with `--profile kaggle`, see [kaggle.yaml](https://github.com/kshoker12/World-Cup-Predictor/blob/main/config/profiles/kaggle.yaml)), which produced the deployed WC 2026 forecasts. Training scripts live in [`scripts/`](https://github.com/kshoker12/World-Cup-Predictor/tree/main/scripts) and model code in [`src/worldcup_predictor/models/`](https://github.com/kshoker12/World-Cup-Predictor/tree/main/src/worldcup_predictor/models).
 
 ### 2.1 Tabular model (LightGBM Poisson)
 
@@ -203,12 +203,12 @@ where \\(\alpha\\) is a global intercept, \\(a&#95;t\\) is team \\(t\\)'s attack
 Sparse national-team schedules make raw per-team estimates noisy. The model therefore places shrinkage priors on latent strengths,
 
 $$
-a&#95;t \sim \mathcal{N}(0, \sigma&#95;a^2), \qquad d&#95;t \sim \mathcal{N}(0, \sigma&#95;d^2),
+a&#95;t \sim \mathcal{N}(0, \sigma^2), \qquad d&#95;t \sim \mathcal{N}(0, \sigma^2),
 $$
 
-with \\(\sigma&#95;a, \sigma&#95;d\\) learned from data. Teams with few matches are pulled toward the population average; teams with long histories can separate. Low-score correlation is handled by the same Dixon–Coles \\(\rho\\) parameter from Section 1.2, with \\(\rho \sim \text{Uniform}(-0.2, 0.1)\\).
+with a shared scale \\(\sigma \sim \text{HalfNormal}(1)\\) learned from data. Teams with few matches are pulled toward the population average; teams with long histories can separate. Low-score correlation is handled by the same Dixon–Coles \\(\rho\\) parameter from [Section 1.2](#12-statistical-modelling-approach), with \\(\rho \sim \text{Uniform}(-0.2, 0.1)\\).
 
-**Training:** The model is fit with PyMC using NUTS sampling on international matches from 2000 onward on the **train split only** (validation is reserved for calibration). Production sampler settings:
+**Training:** The model is fit with PyMC using NUTS sampling on international matches from 2000 onward on the **train split only**, i.e. 2000 to 2009 (validation is reserved for calibration). Production sampler settings:
 
 - \\(4\\) chains
 - \\(1000\\) tuning steps
@@ -268,11 +268,11 @@ Pipeline script: [run_kaggle_pipeline.py](https://github.com/kshoker12/World-Cup
 
 ### 2.6 Held-out test evaluation
 
-All models are trained only on the training split. We report match-level quality on the held-out **test** split (\\(8{,}192\\) international matches) using the production artifacts. Metrics are computed by [evaluate_test_metrics.py](https://github.com/kshoker12/World-Cup-Predictor/blob/main/scripts/evaluate_test_metrics.py).
+All models are trained only on the training split. Match-level quality is only reported on the held-out **test** split (\\(8{,}192\\) international matches) using the production artifacts. Metrics are computed by [evaluate_test_metrics.py](https://github.com/kshoker12/World-Cup-Predictor/blob/main/scripts/evaluate_test_metrics.py).
 
 **Goal-rate metrics** measure how well predicted expected goals \\((\lambda&#95;h, \lambda&#95;a)\\) match realized scores:
 
-- **Poisson deviance** (primary training loss): average negative log-likelihood under independent Poisson goals; lower is better.
+- **Poisson deviance** (primary training loss): mean Poisson deviance of home goals plus that of away goals (twice the log-likelihood gap to a perfect fit under independent Poisson goals); lower is better.
 - **Goal MAE**: mean absolute error between \\(\lambda\\) and the actual goal count; lower is better.
 
 **Outcome metrics** convert \\((\lambda&#95;h, \lambda&#95;a)\\) to win/draw/loss probabilities via the Dixon–Coles score grid (\\(\rho = -0.05\\)) and score the full distribution:
@@ -280,7 +280,7 @@ All models are trained only on the training split. We report match-level quality
 - **WDL log loss**: multiclass log loss for the actual result; lower is better.
 - **Outcome accuracy**: fraction of matches where the highest-probability outcome is correct; higher is better.
 
-A **naive mean** baseline predicts every match at the training-set average score (\\(\approx 1.5\\)–\\(1.2\\) home/away) and anchors how much signal the learned models extract.
+A **naive mean** baseline predicts every match at the training-set average score (\\(\approx 1.8\\)–\\(1.2\\) home/away) and anchors how much signal the learned models extract.
 
 | Model | Poisson deviance | Goal MAE | WDL log loss | Outcome accuracy |
 |-------|----------------:|---------:|-------------:|-----------------:|
@@ -290,9 +290,9 @@ A **naive mean** baseline predicts every match at the training-set average score
 | **Ensemble** | **2.352** | **0.934** | **0.871** | **60.4%** |
 | Naive mean | 3.171 | 1.126 | 1.056 | 47.8% |
 
-LightGBM is the strongest single model on goal-rate error, which matches its role as the tabular backbone. The LSTM adds complementary sequential signal (slightly worse in isolation but weighted at \\(0.33\\) in the ensemble). The Bayesian term is the weakest point predictor on this split, yet its \\(0.24\\) weight still helps by regularizing extreme team rates.
+LightGBM is the strongest single model on goal-rate error, which matches its role as the tabular backbone. The LSTM adds complementary sequential signal (slightly worse in isolation but weighted at \\(0.33\\) in the ensemble). The Bayesian term is the weakest point predictor on this split, yet the validation-fitted weighting still keeps it at \\(0.24\\), where its shrinkage-based team strengths temper extreme rates from the other two models.
 
-The calibrated ensemble improves on the best single model across every reported metric: Poisson deviance by \\(1.7\\%\\), WDL log loss by \\(0.5\\%\\), and outcome accuracy from \\(60.0\\%\\) to \\(60.4\\%\\). The gain is modest in absolute terms (international football is noisy), but consistent: combining heterogeneous predictors beats any one model alone, which is why the knockout simulator uses the ensemble rate from [Section 2.4](#24-calibration-and-ensemble).
+The calibrated ensemble improves on the best single model across every reported metric: Poisson deviance by \\(1.7\\%\\), WDL log loss by \\(0.5\\%\\), and outcome accuracy from \\(60.0\\%\\) to \\(60.4\\%\\). The gain is modest in absolute terms (international football is noisy), but consistent across every metric, and largest on Poisson deviance, the quantity the ensemble weights were optimized for. Combining heterogeneous predictors beats any one model alone on this test window, which is why the knockout simulator uses the ensemble rate from [Section 2.4](#24-calibration-and-ensemble).
 
 ---
 
@@ -300,13 +300,13 @@ The calibrated ensemble improves on the best single model across every reported 
 
 Knockout forecasting has two stages. First, rebuild each team's pre-match features from all results available before the round. Second, run \\(N\\) independent bracket simulations, each playing out every remaining matches by sampling scorelines from the calibrated ensemble ([Section 2.4](#24-calibration-and-ensemble)). Reported probabilities are event frequencies: the fraction of simulations in which an outcome occurs.
 
-Production runs use \\(N = 80{,}000\\) ([kaggle.yaml](https://github.com/kshoker12/World-Cup-Predictor/blob/main/config/profiles/kaggle.yaml)). Simulation code: [simulation/](https://github.com/kshoker12/World-Cup-Predictor/tree/main/src/worldcup_predictor/simulation).
+Production runs use \\(N = 80{,}000\\), recorded in every archived forecast (e.g. [forecast_pre_r16.json](https://github.com/kshoker12/World-Cup-Predictor/blob/main/docs/data/history/forecast_pre_r16.json)); one full Round of 16 run took about \\(8.3\\) hours on Kaggle. Simulation code: [simulation/](https://github.com/kshoker12/World-Cup-Predictor/tree/main/src/worldcup_predictor/simulation).
 
 ### 3.1 Pre-round setup
 
 Before drawing any scores, the forecast script does four things once:
 
-1. **Load match history:** read international results and append new WC 2026 scores from [wc2026_results.csv](https://github.com/kshoker12/World-Cup-Predictor/blob/main/docs/data/wc2026_results.csv).
+1. **Load match history:** read international results and append new WC 2026 scores from `wc2026_results.csv`.
 2. **Snapshot team state:** replay all matches with kickoff strictly before the round date through the training feature pipeline (Elo, rolling form, head-to-head, LSTM histories), producing pre-match features for every team entering the round.
 3. **Load models:** read the calibrated ensemble from disk ([Section 2.4](#24-calibration-and-ensemble)).
 4. **Fix the bracket:** set the knockout pairings for the current round (e.g. [world_cup_2026_knockout.yaml](https://github.com/kshoker12/World-Cup-Predictor/blob/main/config/tournaments/world_cup_2026_knockout.yaml)).
@@ -315,7 +315,7 @@ Steps 1–2 capture *what we know about each team so far*; steps 3–4 capture *
 
 ### 3.2 One bracket simulation
 
-Each simulation is one full play-through of the remaining knockout tree, starting from the same pre-round snapshot and using its own random seed. Simulations do not share state.
+Each simulation is one full play-through of the remaining knockout tree, starting from the same pre-round snapshot and with its own random draws. Simulations do not share state.
 
 **Per match:** (home \\(h\\) vs away \\(a\\))
 
@@ -348,7 +348,7 @@ With \\(N = 80{,}000\\), sampling error on a \\(50\\%\\) probability is about \\
 
 At the start of each knockout round during the tournament:
 
-1. **Ingest results:** append completed matches to [wc2026_results.csv](https://github.com/kshoker12/World-Cup-Predictor/blob/main/docs/data/wc2026_results.csv).
+1. **Ingest results:** append completed matches to `wc2026_results.csv`.
 2. **Update bracket:** set the next round's fixtures in the tournament config.
 3. **Run setup** ([Section 3.1](#31-pre-round-setup)).
 4. **Simulate:** run \\(N = 80{,}000\\) bracket simulations ([Sections 3.2–3.3](#32-one-bracket-simulation)).
@@ -380,7 +380,7 @@ Match prediction accuracy across all knockout rounds: **12/16 correct (75.0%)**.
 | Final & third place | 1 | 2 | 50.0% |
 | **Overall** | **12** | **16** | **75.0%** |
 
-The final pre-round forecast ([wc2026_forecast_final.json](https://github.com/kshoker12/World-Cup-Predictor/blob/main/docs/data/wc2026_forecast_final.json), \\(80{,}000\\) simulations) correctly favored Spain over Argentina (55.92%) but missed the third-place match, where France (66.49%) lost to England.
+The final pre-round forecast ([wc2026_forecast_final.json](https://github.com/kshoker12/World-Cup-Predictor/blob/main/docs/data/wc2026_forecast_final.json), \\(80{,}000\\) simulations) correctly favored Spain over Argentina (55.92%) but missed the third-place match, where France (66.49%) lost to England. Summed over all 16 matches, the model's own win probabilities for its picks implied about 10.4 correct predictions; it got 12, slightly better than its forecasts expected and well in line with them.
 
 ### 4.2 Round of 16
 
@@ -491,6 +491,7 @@ Supplementary club match fixtures and stats merged with Understat for LSTM pretr
 | `ga_last_5_diff` | (Home goals conceded in last 5 matches) − (Away goals conceded in last 5). |
 | `form_diff` | Exponentially-decayed results signal (home − away), where recent results weigh more. |
 | `h2h_gd_weighted` | Exponentially-decayed head-to-head goal difference (home − away). |
+| `is_home` | Whether the listed home team is playing at home. |
 | `is_neutral` | Whether the match is played at a neutral venue. |
 | `tournament_importance` | A scalar representing the stakes of the match (e.g., friendly vs. World Cup). |
 

@@ -10,18 +10,18 @@
 - **[Backend Repo](https://github.com/kshoker12/Chess-Engine)** — FastAPI + PyTorch inference
 
 ## 1 Abstract
-This project demonstrates that chess can be effectively modeled as a language problem, where entire games are treated as conversations and individual moves as words. This involves a policy network ($28.2$ million parameter transformer) which predicts the next move autoregressively given the sequence of prior moves. On held-out games, the best move appears in policy's top-$7$ suggestions $\approx 89.2 \\%$ of the time.
+This project demonstrates that chess can be effectively modeled as a language problem, where entire games are treated as conversations and individual moves as words. This involves a policy network ($28.2$ million parameter transformer) which predicts the next move autoregressively given the sequence of prior moves. On held-out games, the best move (according to Stockfish 16) appears in the policy's top-$7$ suggestions $\approx 89.2 \\%$ of the time.
 
-To correct tactical or long-term errors, the policy is paired with a value network ($10.7$ million parameter transformer) that scores any given board state with a normalized centipawn value, indicating favourability of the board. This network explicitly models chess-board geometry and complex piece-interaction nuances through full self-attention. It was further refined over $10$ cycles of self-play reinforcement learning following an actor-critic framework, where the model played against itself to  generate games and label them using an oracle model (Stockfish 16), and then used to fine-tune and iteratively improve its own evaluation.
+To correct tactical or long-term errors, the policy is paired with a value network ($10.7$ million parameter bidirectional transformer) that scores any given board state with a normalized centipawn value, indicating favourability of the board. The network reads the board as a sequence of $64$ tokens, one per square, where each token is an ordinal feature encoding the piece on that square ($0$ = empty, $1$-$6$ = white pawn, knight, bishop, rook, queen, king, $7$-$12$ = the same black pieces), with the board mirrored so the side to move is always white. Each token combines a learned piece embedding with learned rank and file embeddings, and bidirectional self-attention lets every square attend to every other square, explicitly modelling chess-board geometry and complex piece-interaction nuances. It was further refined over $10$ cycles of self-play: the engine played against itself to generate fresh positions, an oracle model (Stockfish 16) labeled them, and the value network was fine-tuned on those labels, with each new version having to beat the reigning champion before taking over. This teaches the value network to judge exactly the kinds of positions its own policy creates, including the policy's mistakes.
 
-At inference, the two networks supply rapid intuition, while classical search algorithms such as Two-Step Look-Ahead, Alpha-Beta Pruning, and Monte Carlo Tree Search, provide systematic reasoning. The engine's "hard mode" can beat the $2200$-$2400$ ELO bots on Chess.com and can consistently reach complex endgames against $2600+$ ELO opponents, demonstrating strong grandmaster-like intuition.
+At inference, the two networks supply rapid intuition, while classical search algorithms such as Two-Step Look-Ahead, Alpha-Beta Pruning, and Monte Carlo Tree Search, provide systematic reasoning. In 10-game tests per mode against Chess.com bots, the engine's "hard mode" beats the $2200$-$2400$ ELO bots and stays competitive against $2600+$ ELO opponents, often taking games deep into complex endgames.
 
 The entire system was trained and deployed under realistic constraints using Kaggle T4 GPUs, public Lichess data, and serverless cloud infrastructure (AWS Lambda + RunPod) and shows that carefully designed transformers combined with policy-value decomposition and efficient search can deliver high-level chess play without massive computational resources.
 
 **Key Achievements**
-- $28.2$ million parameter policy transformer + $10.7$ million parameter value transformer, fully trained on Kaggle T4 GPUs only
-- $10$ cycles of AlphaGo-style self-play reinforcement learning (self-generated games labeled by Stockfish 16 oracle)
-- Hard mode (Policy + Value + Monte Carlo Tree Search) reaches $2200$–$2400$ ELO and competitive against $2600+$ ELO opponents
+- $28.2$ million parameter policy transformer + $10.7$ million parameter bidirectional value transformer, fully trained on Kaggle T4 GPUs only
+- $10$ cycles of champion-gated self-play fine-tuning (self-generated games labeled by the Stockfish 16 oracle)
+- Hard mode (Policy + Value + Monte Carlo Tree Search) estimated at $2200$–$2400$ ELO and competitive against $2600+$ ELO opponents
 - Fully serverless inference architecture (FastAPI + AWS Lambda + RunPod GPU)
 
 ## 2 Introduction
@@ -33,7 +33,7 @@ Early breakthroughs, such as IBM's Deep Blue defeating world champion Garry Kasp
 
 In contrast, AlphaZero [2] demonstrated a paradigm shift where starting from random play and given only the rules, a deep neural network trained solely via self-play reinforcement learning achieved superhuman performance in chess within hours, using a joint policy-value network and Monte Carlo Tree Search (MCTS).
 
-Recent work has pushed towards efficient alternatives utilizing large transformers trained via supervised learning on oracle evaluations can reach grandmaster-level play without explicit search. These advances show that deep learning, particularly transformers, can mimic high-level chess intuition under realistic computation constraints.
+Recent work has pushed towards efficient alternatives: large transformers trained via supervised learning on oracle (Stockfish) evaluations can reach grandmaster-level play without explicit search [10]. These advances show that deep learning, particularly transformers, can mimic high-level chess intuition under realistic computation constraints.
 
 ### 2.2 Motivation
 This project began with a simple personal goal to build a chess model strong enough to consistently beat me (I'm currently $\approx 1600$ Elo) using only my own trained networks with no external oracle evaluation during inference. 
@@ -59,12 +59,12 @@ This project was developed from December 2025 to March 2026 ($\approx 4$ months)
 
 ### 2.4 Document Overview
 This report details the design, implementation, and optimization of the chess model:
-- **Section 3** describes the policy network.
-- **Section 4** covers the value network.
-- **Section 5** explains the inference algorithms.
-- **Section 6** presents the full system architecture.
-- **Section 7** summarizes model strength, key takeaways, future improvements, and a self-reflection on the development process.
-- **Section 8** provides the complete list of references.
+- **[Section 3](#3-policy-network)** describes the policy network.
+- **[Section 4](#4-value-network)** covers the value network.
+- **[Section 5](#5-algorithms)** explains the inference algorithms.
+- **[Section 6](#6-architecture)** presents the full system architecture.
+- **[Section 7](#7-conclusions)** summarizes model strength, limitations, key takeaways, future improvements, and a self-reflection on the development process.
+- **[Section 8](#8-references)** provides the complete list of references.
 
 ## 3 Policy Network
 
@@ -100,7 +100,7 @@ $$
 \mathcal{L}(\theta) = \mathbb{E}\_{(s\_1, \dots, s\_{t-1}, s\_t)} \left[ -\log p\_\theta(s\_t \mid s\_1, \dots, s\_{t-1}) \right]
 $$
 
-This maximum likelihood objective implicitly learns a distribution that favors grandmaster-level decisions.
+This maximum likelihood objective implicitly learns a distribution that favors the strong, expert-level decisions that dominate the training corpus.
 ### 3.2 Data Collection
 
 The training corpus for the policy network was constructed from high-quality public chess games to expose the model to diverse, strong play while maintaining computational feasibility on Kaggle hardware.
@@ -108,13 +108,13 @@ The training corpus for the policy network was constructed from high-quality pub
 **Primary sources**:
 - **Lichess Elite Database** [7]: A curated subset of Lichess games filtered for high-Elo players from June 2020 to November 2025 (originally 2200+, tightened to 2500+ in later years). This dataset emphasizes grandmaster-level and expert play, providing clean, high-quality move sequences.
 - **Lichess Standard Database** [6]: Full monthly Lichess dumps (all rating levels). Introduces variety and prevents overfitting to elite patterns, four specific months were sampled at random to build corpus: January 2013, September 2013, July 2014, and November 2014.
+- **Grandmaster Games**: A smaller hand-collected set of PGNs from top players (e.g. Magnus Carlsen, Fabiano Caruana, Hikaru Nakamura, Viswanathan Anand, Bobby Fischer) plus FICS game-database exports, $\approx 43$K games, mixed into training batches to keep world-class play in view.
 
+The final corpus contains a total $964,921,229$ UCI Moves, providing the policy network with diverse, high quality data to learn robust, generalizable move distributions. All data is public domain (CC0) or freely available from Lichess.org. Below is a short excerpt of the corpus (training data), showing the end of one game and the start of the next:
 
-The final corpus contains a total $964,921,229$ UCI Moves, providing the policy network with diverse, high quality data to learn robust, generalizable move distributions. All data is public domain (CC0) or freely available from Lichess.org. Below is a dump of the corpus (training data): 
+`e7e5 c2c4 g8f6 b1c3 d7d5 c4d5 f6d5 g1f3 b8c6 d2d3 f8e7 g2g3 ... e5e7 d8d7 e7d7 h3d7 a5e5 | e7e5 e2e4 g8f6 f2f4 f6e4 d1f3 d7d5 d2d3 e4c5 f4e5 b8c6 ...`
 
-`e7e5 c2c4 g8f6 b1c3 d7d5 c4d5 f6d5 g1f3 b8c6 d2d3 f8e7 g2g3 c8e6 f1g2 f7f6 e1g1 d8d7 a2a3 e8c8 d1a4 c8b8 f1d1 g7g5 c3d5 e6d5 c1e3 d7e6 f3d2 f6f5 g2d5 e6d5 d2f3 f5f4 e3d2 h7h5 d2b4 e7f6 a1c1 c6b4 a3b4 h5h4 c1c5 d5e6 d1a1 a7a6 a4a5 c7c6 f3e5 f6e5 c5e5 e6h3 e5e7 d8d7 e7d7 h3d7 a5e5 | e7e5 e2e4 g8f6 f2f4 f6e4 d1f3 d7d5 d2d3 e4c5 f4e5 b8c6 f3g3 c5e6 g1f3 f8c5 c2c3 d5d4 f1e2 a7a5 b1d2 a5a4 d2e4 c5e7 e1g1 e8g8 c1d2 g8h8 g1h1 e6c5 f3g5 d8e8 f1f2 h7h6 g5f3 c5e4 d3e4 e7c5 f2f1 c8e6 f3h4 h8h7 e2d3 c5b6 h4f5 e6f5 e4f5 e8e5 f5f6 g7g6 d2f4 e5h5 a1e1 a8e8 d3e4 h5b5 g3h3 h6h5 g2g4 f8h8 g4h5 h7g8 h5h6 d4c3 b2c3 b5c4 h3g2 g8h7 g2f3 c4a2 e4d5 a2c2 d5f7 e8e1 f1e1 h8f8 f7d5 f8f6 d5c6 b7c6 e1e7 h7h8 f4e5 c2c1 h1g2 c1g5 f3g3 g5d2 g2h3 | e2e4 e7e5 g1f3 b8c6 b1c3 g8f6 f1c4 f6e4 c4f7 e8f7 c3e4 d7d5 e4g5 f7g8 d2d4 h7h6 g5h3 c8g4 d4e5 c6e5 h3f4 c7c6 h2h3 e5f3 g2f3 g4f5 c1e3 f8b4 c2c3 b4a5 h1g1 d8e8 f4d5 e8f7 d5f4 a8e8 d1b3 a5c7 b3f7 g8f7 f4h5 g7g6 h5g3 f5h3 e1c1 e8d8 d1d8 c7d8 g1h1 h3g2 h1h6 h8h6 e3h6 g2f3 h6e3 |`
-
-Note that '|' is used as a padding operator to separate games in the corpus. Interestingly, the model implicitly learns to ignore context appearing before the padding operator '|' and treats it as noise because it comes from a previous game and won't help predict the next move. 
+Note that '|' is used as a padding operator to separate games in the corpus. Since a $128$-move window can span the end of one game and the start of the next, the separator lets the model learn to treat context before '|' as noise: it comes from a previous game and won't help predict the next move. 
 
 ### 3.3 Architecture 
 
@@ -140,7 +140,7 @@ Full implementation available at [model.py](https://github.com/kshoker12/Chess-E
 
 ### 3.4 Training
 
-The policy network was trained via supervised next-token prediction (cross-entropy loss) on the UCI sequence corpus described in Section 3.2. Training ran on Kaggle T4 x2 GPUs using PyTorch with mixed precision (AMP) for speed and memory efficiency.
+The policy network was trained via supervised next-token prediction (cross-entropy loss) on the UCI sequence corpus described in [Section 3.2](#32-data-collection). Training ran on Kaggle T4 x2 GPUs using PyTorch with mixed precision (AMP) for speed and memory efficiency.
 
 **Optimizer & schedule**:
 - Optimizer: AdamW (lr=$3e^{-4}$, weight decay=$1e^{-4}$)
@@ -158,7 +158,7 @@ Full training scripts available at [train.py](https://github.com/kshoker12/Chess
 
 ### 3.5 Evaluation
 
-The policy network was evaluated on its ability to predict the best moves in unseen game sequences. I sampled $10$K random held-out sequences (not seen during training) and computed how often the model's top-$k$ moves with the highest probability (based on the conditional probability distribution output of the model) included the best move according to Stockfish 16 (State-of-the-art chess engine) which serves as an oracle model.
+The policy network was evaluated on its ability to predict the best moves in unseen game sequences. I sampled $10$K random held-out sequences (not seen during training) and computed how often the model's top-$k$ moves with the highest probability (based on the conditional probability distribution output of the model) included the best move according to Stockfish 16 (State-of-the-art chess engine, searching $0.1$s per position) which serves as an oracle model.
 
 | Metric     | Accuracy |
 |------------|----------|
@@ -167,7 +167,9 @@ The policy network was evaluated on its ability to predict the best moves in uns
 | Top-$5$      | $83.52\\%$  |
 | Top-$7$      | $89.24\\%$  |
 
-These figures indicate strong predictive performance since the best move appears in the top-5 suggestions $\approx 83.5\\%$ of the time, and in the top-7 $\approx 89.2\\%$ of the time. This suggests the policy network has learned meaningful patterns of grandmaster-level play from the training corpus. 
+These figures indicate strong predictive performance since the best move appears in the top-5 suggestions $\approx 83.5\\%$ of the time, and in the top-7 $\approx 89.2\\%$ of the time. This suggests the policy network has learned meaningful patterns of strong play from the training corpus.
+
+This number matters directly for the engine. Every search mode in [Section 5](#5-algorithms) only explores the policy's top candidates, so top-$k$ accuracy is effectively a ceiling on what the search can find. A top-$7$ hit rate of $\approx 89\\%$ means the strongest move is almost always on the table for the value network and search to pick out, while the policy keeps the search narrow enough to run in seconds.
 
 ## 4 Value Network
 
@@ -192,7 +194,7 @@ $$
 v_\theta(s) \approx \tanh (v^*(s)/400) \in (-1, 1)
 $$
 
-where $\theta$ are the model parameters and $v^*(s)\in \mathbb R$ is the oracle cp evaluation from Stockfish, normalized via hyperbolic tangent scaling to stabilize training and provide a probabilistic win/draw/loss interpretation (e.g. +1 ≈ certain win, 0 ≈ equal, -1 ≈ certain loss). 
+where $\theta$ are the model parameters and $v^*(s)\in \mathbb R$ is the oracle cp evaluation from Stockfish, normalized via hyperbolic tangent scaling to stabilize training and provide an intuitive win/draw/loss reading (e.g. +1 ≈ certain win, 0 ≈ equal, -1 ≈ certain loss). 
 
 The network minimizes mean squared error:
 
@@ -219,7 +221,7 @@ Evaluating a chess position accurately depends critically on whose turn it is to
 
 ### 4.3 Architecture
 
-The value network is a lightweight, full self-attention transformer for chess board evaluation. It treats the $64$-square board as a fixed-length sequence of $64$ tokens (one per square), with each token representing the ordinal-encoded piece on that square as discussed in section 4.2. Full self-attention blocks allows every square to interact directly with every other, effectively capturing global chess geometry and piece relationships.
+The value network is a lightweight bidirectional transformer (full self-attention, no causal mask) for chess board evaluation. It treats the $64$-square board as a fixed-length sequence of $64$ tokens (one per square), with each token representing the ordinal-encoded piece on that square as discussed in [section 4.2](#42-data-collection). Full self-attention blocks allows every square to interact directly with every other, effectively capturing global chess geometry and piece relationships.
 
 **Key hyperparameters**:
 - Embedding dimension (`n_embed`): $384$
@@ -231,7 +233,7 @@ The value network is a lightweight, full self-attention transformer for chess bo
 
 **Core components**:
 - Piece, Rank & File Embeddings: Learned embeddings for each of the $13$ possible square states ($0$ = empty, $1$–$6$ = white pieces, $7$–$12$ = black pieces) + separate learned embeddings for ranks ($1$-$8$) and files ($A$-$H$). This encodes piece semantics and spatial coordinates explicitly.
-- Self-Attention Blocks: Multi-head self-attention (no causal masking) to enable global interactions across the board, leveraging rank/file embeddings to capture chess-specific long-range dependencies 
+- Self-Attention Blocks: Multi-head self-attention (no causal masking) to enable global interactions across the board, leveraging rank/file embeddings to capture chess-specific dependencies 
 - Feed-Forward Blocks: Standard two-layer MLP per block (expansion ratio 4× → GELU → projection), with residual connections and pre-LayerNorm for stable training.
 - Value Head: Mean-pooling over the $64$ token hidden states, followed by a small MLP ($384$ → $192$ → $1$) with Tanh activation to output the normalized value in ($-1$, $1$).
 
@@ -253,13 +255,13 @@ The value network was pre-trained via supervised regression on $\approx 50$ mill
 - Train/val split: $90/10$ chronological (no shuffle leakage, preserves game distribution)
 - Final MSE loss: $\approx 0.098$ on preprocessed targets $\tanh(v^*(s)/400) \in (-1, 1)$
 
-This supervised pre-training provides a strong initialization for reinforcement fine-tuning (Section 4.5).
+This supervised pre-training provides a strong initialization for fine-tuning ([Section 4.5](#45-fine-tuning-self-play)).
 
 Full training scripts available at [train.py](https://github.com/kshoker12/Chess-Engine/blob/main/value_transformer/train.py).
 
-### 4.5 Fine-Tuning (Reinforcement Learning)
+### 4.5 Fine-Tuning (Self-Play)
 
-To adapt the value network to correct policy network mistakes and improve long-term judgment, the model underwent reinforcement learning via self-play, following the tabula rasa approach introduced in AlphaZero [2]. This process iteratively generates new training data through self-play and fine-tunes the value network using an actor-critic framework.
+To adapt the value network to correct policy network mistakes and improve long-term judgment, the model underwent self-play fine-tuning, inspired by the self-play loop introduced in AlphaZero [2]. The loop starts from the pretrained policy and value networks and uses Stockfish 16 as an oracle labeler. Each cycle generates new training data through self-play, labels every position with Stockfish, and fine-tunes the value network on those labels. The policy proposes moves and the value network judges them, so the value network is refined on exactly the positions its own policy produces, which is where its judgment matters most during search.
 
 **Self-Play Loop**  
 In each iteration, the current champion value network (i.e., current best model) guides parallel self-play between two instances of itself to generate new training data. Games are played as follows:
@@ -267,7 +269,7 @@ In each iteration, the current champion value network (i.e., current best model)
 - For each candidate, the board is simulated and evaluated using the value network and Stockfish 16 (depth $22$) for oracle labels.
 - Move selection is asymmetric per game. One side uses a weighted score ($0.7 \times$ value network $ + $ $0.3\times$ Stockfish), while other side relies solely on value network. 
 - Both sides occasionally take random exploration steps by sampling from the conditional probability distribution output of the policy network with Dirichlet noise ($\alpha = 0.25$) to promote diverse positions.
-- Games are played to completion with $\approx 4500$ games per iteration, corresponding to $3.5$-$4$ million board states.
+- Games are played to completion with $\approx 4500$ games per iteration ($15$ Kaggle notebooks running in parallel, $300$ games each), corresponding to $3.5$-$4$ million board states.
 - All evaluated board states are labeled with normalized centipawn scores from Stockfish 16 evaluated to depth $22$ and appended to the training set for the next fine-tuning cycle.
 
 **Champion Evaluation**  
@@ -283,9 +285,9 @@ After each fine-tuning cycle, a championship match is conducted where the curren
 Full self-play and fine-tuning scripts available at [self_play.py](https://github.com/kshoker12/Chess-Engine/blob/main/value_transformer/self_play.py) and [retrain.py](https://github.com/kshoker12/Chess-Engine/blob/main/value_transformer/retrain.py).
 
 ### 4.6 Metrics
-Fine-tuning (Reinforcement Learning) via self-play cycles generates high-quality, policy-specific data that exposes the value network to the policy network’s strengths and weaknesses. By continually challenging the champion, the process drives the value distribution closer to the true oracle distribution, enhancing its ability to re-rank policy suggestions and correct long-term errors. After $10$ self-play loops, the value network became a more reliable partner to the policy, resulting in stronger overall gameplay. 
+Self-play fine-tuning generates high-quality, policy-specific data that exposes the value network to the policy network’s strengths and weaknesses. By continually challenging the champion, the process drives the value distribution closer to the true oracle distribution, enhancing its ability to re-rank policy suggestions and correct long-term errors. After $10$ self-play loops, the value network became a more reliable partner to the policy, resulting in stronger overall gameplay. 
 
-The table below summarizes progress across iterations, showing validation loss on pre-trained data, new self-play data, and win rate against the previous champion.
+The table below summarizes progress across iterations, showing validation loss on pre-trained data, new self-play data, and win rate against the previous champion in the $400$-game championship match.
 
 | Iteration | Pre-Trained Data Loss | New Self-Play Data Loss | Win Rate vs. Previous Champion |
 |-----------|---------------|---------------|-------------------------------|
@@ -300,6 +302,8 @@ The table below summarizes progress across iterations, showing validation loss o
 | $8$         | $0.08092$       | $0.04481$       | $67\\%$                           |
 | $9$         | $0.07893$       | $0.04414$       | $65\\%$                           |
 | $10$        | $0.07507$       | $0.04383$       | $62\\%$                           |
+
+Both losses fall across the $10$ cycles. Loss on the original pretraining positions keeps improving ($0.098 \rightarrow 0.075$) while loss on the new self-play positions drops from $0.078$ to $0.044$, so the self-play data sharpens what the network learned in pretraining instead of overwriting it. Every challenger also beat the reigning champion ($62$-$72\\%$ over $400$ games), so the champion was replaced each cycle and the network deployed in production is the latest champion.
 
 ## 5 Algorithms
 
@@ -446,7 +450,7 @@ The entire system is fully serverless to optimize cost and scalability. The fron
 
 ### 7.1 Model Strength
 
-Model strength was evaluated by simulating $10$ games against Chess.com bots of varying difficulty levels, providing a practical approximation of Elo rating for search algorithm.
+Model strength was evaluated by playing $10$ games per mode against Chess.com bots of varying difficulty levels, providing a practical approximation of the Elo rating for each search algorithm.
 
 | Mode | Algorithm | Estimated strength | Key settings |
 |------|-----------|-------------------|--------------|
@@ -454,30 +458,37 @@ Model strength was evaluated by simulating $10$ games against Chess.com bots of 
 | Medium | Alpha-Beta Pruning / MinMax Search | $\approx 1600-1900$ ELO | Depth $4$ |
 | Hard | Monte Carlo Tree Search (MCTS) | $\approx 2200-2400$ ELO | $400$ simulations |
 
-Although the original goal was grandmaster-level performance ($2600+$ Elo), the model did not reach that threshold. However, the Hard mode demonstrates strong grandmaster-like intuition as it consistently reaches endgames against $2600+$ ELO bots and forces complex, competitive positions before being overwhelmed by superior search depth. This confirms that the policy-value combination with MCTS achieves high-level strategic understanding under limited compute constraints.
+Although the original goal was grandmaster-level performance ($2600+$ Elo), the model did not reach that threshold. However, Hard mode was consistently competitive against $2600+$ ELO bots: across several games it reached complex endgames and forced difficult positions before being overwhelmed by superior search depth. This suggests that the policy-value combination with MCTS captures real strategic understanding under limited compute constraints.
 
-### 7.2 Takeaways
+### 7.2 Limitations
+
+**Strength estimates.** The ratings in [Section 7.1](#71-model-strength) come from $10$ games per mode, which is enough to place each mode in a rough band but not to pin down a precise rating. With $10$ games, a performance rating carries an uncertainty of roughly $\pm 200$ Elo, and Chess.com bot ratings are not calibrated against a common rating pool.
+
+**Next step.** The natural fix is a standard engine-rating protocol: automated matches (e.g. with cutechess-cli) against Stockfish set to calibrated strength levels (`UCI_LimitStrength` / `UCI_Elo`, which Stockfish anchors to the CCRL rating list), at a fixed time per move, with balanced openings played from both colors and several hundred games per level. Fitting those results with BayesElo or Ordo gives an Elo estimate with a confidence interval, turning these bands into a measured rating.
+
+### 7.3 Takeaways
 - **Context Length Matters:** Reducing the policy network’s context window from $256$ to $128$ moves substantially improved performance. In chess, early-game moves quickly lose relevance and a shorter context enables the model to focus on recent patterns and generalize more effectively across game phases.
 - **Data Diversity is Essential:** Training exclusively on grandmaster games led to the model struggling against lower-rated opponents by hallucinating/blundering because it had never encountered suboptimal or blunder-prone play during training. Including games across all rating levels is critical for robust, real-world performance.
 - **Neural Intuition + Classical Reasoning:** Pure deep learning alone yields suboptimal results. The policy and value networks serve as the model’s “intuition,” rapidly identifying promising moves, while classical search algorithms provide systematic “reasoning” by exploring consequences. Their combination is key to achieving competitive strength under limited compute.
 - **Hardware Constraints Drive Innovation:** State-of-the-art performance remains difficult with consumer-grade resources. However, meaningful gains are achievable through careful architectural choices, efficient training schedules, and maximizing the number of iterations within available compute.
 - **Machine Learning is Iterative:** Progress emerges through continuous experimentation, research, and incremental refinements. Each cycle of insight and optimization compounds, steadily elevating model capability.
 
-### 7.3 Self-Reflection
+### 7.4 Self-Reflection
 As a combined Computer Science and Statistics major, I have long been drawn to the intersection of algorithms, statistical learning, and intelligent systems. This project began during winter break as an exploration of how modern large language models (e.g. ChatGPT, Claude, Gemini) worked under the hood. Inspired by 3Blue1Brown’s deep-learning series [9] and Andrej Karpathy’s nanoGPT lecture [5], I realized that chess games could be modeled as sequences of “moves” in a language-like manner. This insight sparked the core idea to treat chess as autoregressive sequence prediction and build a transformer-based engine capable of beating me (I'm $\approx 1600$ ELO).
 
-Over four months, the project presented numerous technical and conceptual challenges. Training over $100$ model variants, debugging inference pipelines, and optimizing under Kaggle GPU constraints required persistent iteration and extensive literature review. Each roadblock became an opportunity to refine the architecture, data pipeline, or search strategy. Through this process, I gained hands-on experience with complex architectures such as transformers, reinforcement learning via self-play and actor-critic methods, and the integration of deep learning with classical search algorithms; skills that will help me in developing more intelligent systems in the future.
+Over four months, the project presented numerous technical and conceptual challenges. Training over $100$ model variants, debugging inference pipelines, and optimizing under Kaggle GPU constraints required persistent iteration and extensive literature review. Each roadblock became an opportunity to refine the architecture, data pipeline, or search strategy. Through this process, I gained hands-on experience with complex architectures such as transformers, self-play training loops with an oracle labeler, and the integration of deep learning with classical search algorithms; skills that will help me in developing more intelligent systems in the future.
 
 Beyond technical skills, the project reinforced a deeper appreciation for the iterative nature of machine learning and the power of combining domain knowledge with systematic experimentation. It has strengthened my passion for deep learning and reinforced my commitment to pursuing similar research-oriented projects in the future.
 
-### 7.4 Future Improvements
+### 7.5 Future Improvements
 Several promising directions could further elevate model performance under the same compute constraints:
 - **Architecture Optimization for Chess:** The policy transformer would likely benefit from a deeper, narrower design (higher layer count, lower embedding dimension) to emphasize multi-head self-attention over memorization, better capturing long-range move dependencies in chess sequences.
 - **Algorithm-Specific Value Networks:** Training separate value models for each search algorithm (Two-Step Look-Ahead, Alpha-Beta, MCTS) would allow each to correct the unique biases introduced by its search strategy, improving re-ranking accuracy.
 - **Superhuman Policy Sequences:** Incorporating game sequences from state-of-the-art engines such as Stockfish and AlphaZero (obtained via computer tournaments) as additional supervised data could distill superhuman move preferences into the policy network, pushing performance beyond human grandmaster level.
+- **Rigorous Elo Benchmarking:** Replace the 10-game estimates with the calibrated match protocol described in [Section 7.2](#72-limitations), so each mode has a measured rating with a confidence interval.
 - **Pure Tabula Rasa Self-Play:** Extending the current self-play pipeline to a fully tabula-rasa regime (starting from random play with no human data) could discover novel strategies that surpass current human-derived patterns, mirroring the paradigm in AlphaZero [2].
 
-### 7.5 Helpful UBC Course 
+### 7.6 Helpful UBC Course 
 
 The following courses provided essential knowledge that directly supported the design, training, and optimization of this chess AI system.
 
@@ -491,7 +502,7 @@ Covered core algorithms, gradient descent, loss functions, and convexity, guidin
 Explored transformers, variational autoencoders, and diffusion models, providing the architectural foundation for implementing and fine-tuning complex transformer architectures in this project.
 
 **CPSC 422: Intelligent Systems**
-Focused on reinforcement learning which motivated self-play mechanisms using the actor-critic fine-tuning pipeline used to iteratively improve the value network.
+Focused on reinforcement learning, which motivated the self-play fine-tuning pipeline used to iteratively improve the value network.
 
 **CPSC 330: Applied Machine Learning**
 Emphasized practical pipelines, data preprocessing, hyperparameter tuning, and cross-validation, which streamlined training workflows.
@@ -560,3 +571,9 @@ This project draws inspiration from foundational work in transformer architectur
    YouTube playlist: Neural networks.  
    [https://youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi](https://youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi)  
    *Introductory deep-learning playlist for background and intuition.*
+
+10. **Grandmaster-Level Chess Without Search**  
+   Ruoss, A., Delétang, G., Medapati, S., Grau-Moya, J., Wenliang, L. K., Catt, E., Reid, J., & Genewein, T. (2024).  
+   arXiv:2402.04494 [cs.LG].  
+   [https://arxiv.org/abs/2402.04494](https://arxiv.org/abs/2402.04494)  
+   *Shows that a large transformer trained by supervised learning on Stockfish evaluations reaches grandmaster-level play without explicit search.*

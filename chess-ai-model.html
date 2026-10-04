@@ -6,6 +6,7 @@
     <title>Chess AI Model - Documentation</title>
     <!-- Marked.js for markdown parsing -->
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <script src="writing-source.js"></script>
     <!-- Prism.js for syntax highlighting -->
     <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
@@ -175,12 +176,12 @@
         // Fetch and render markdown from file
         const contentDiv = document.getElementById('content');
         
-        fetch('chess-ai-model.md')
-            .then(response => response.text())
-            .then(markdown => {
+        loadWriting('chess-ai-model')
+            .then(({ markdown, assetBase }) => {
                 // Let marked generate code fences with `language-xxx` classes,
                 // then Prism will highlight them after insertion.
                 contentDiv.innerHTML = marked.parse(markdown);
+                rebaseWritingAssets(contentDiv, assetBase);
 
                 const slugCounts = {};
                 const toSlug = (text) => {
